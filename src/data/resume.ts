@@ -51,6 +51,29 @@ export const resumeCs: ResumeData = {
         "Spolupracoval v agilním týmu, účastnil se code review a přispíval k technické dokumentaci.",
       ],
       tech: ["Java", "Kotlin", "Spring Boot", "PostgreSQL", "REST API"],
+      projects: [
+        {
+          name: "AstraZeneca — Systém pro distribuci léčiv",
+          description:
+            "V devítičlenném týmu jsem modernizoval více než 10 let starý systém pro distribuci léčiv do lékáren a nemocnic po celé České republice. Dodali jsme rychlejší a intuitivnější uživatelské rozhraní, odstranili opakující se chyby původního softwaru a zajistili rychlé generování reportů a statistik. Pracoval jsem v agilním procesu založeném na pravidelných schůzkách se zainteresovanými stranami; systém byl dodán jako kompletní cloud-native produkt s úplnou dokumentací.",
+          tech: [
+            "React",
+            "Kotlin",
+            "Spring Boot",
+            "jOOQ",
+            "PostgreSQL",
+            "Google Cloud Platform",
+            "Kubernetes",
+            "automatizované testování",
+          ],
+        },
+        {
+          name: "Global Payments — Platforma pro vydávání karet (Card-Issuing-as-a-Service)",
+          description:
+            "V týmu o 7–10 lidech jsem se podílel na vývoji moderní platformy pro vydávání a správu karet, která koncovým zákazníkům umožňuje zabudovat fyzické i digitální platební karty do vlastních produktů během šesti měsíců, a to bez bankovní licence. Spojuje tvorbu, vydávání a správu karet s integrací do interních systémů Global Payments na modulární, API-first a škálovatelné (MACH) architektuře navržené pro dlouhodobou udržovatelnost.",
+          tech: ["Java", "JVM", "React", "Docker", "HashiCorp Consul"],
+        },
+      ],
     },
     {
       company: "Kentico",
@@ -190,6 +213,29 @@ export const resumeEn: ResumeData = {
         "Collaborated in agile teams, participated in code review, and contributed to technical documentation.",
       ],
       tech: ["Java", "Kotlin", "Spring Boot", "PostgreSQL", "REST API"],
+      projects: [
+        {
+          name: "AstraZeneca — Pharmaceutical Distribution Management System",
+          description:
+            "Modernized a 10+ year-old system for distributing medicines to pharmacies and hospitals across the Czech Republic, working in a team of 9. Delivered a faster, more intuitive UI and eliminated the recurring errors of the legacy software, with quick reporting and statistics generation. Worked in an agile process based on regular stakeholder sessions; the system was delivered as a complete, cloud-native product with full documentation.",
+          tech: [
+            "React",
+            "Kotlin",
+            "Spring Boot",
+            "jOOQ",
+            "PostgreSQL",
+            "Google Cloud Platform",
+            "Kubernetes",
+            "automated testing",
+          ],
+        },
+        {
+          name: "Global Payments — Card-Issuing-as-a-Service Platform",
+          description:
+            "Built a modern card-issuing and management platform with a team of 7–10, enabling end customers to embed physical and digital payment cards into their own products within six months, without a banking license. Combined card creation, issuing, and management with integration into Global Payments' internal systems, using a modular, API-first, scalable (MACH) architecture built for long-term maintainability.",
+          tech: ["Java", "JVM", "React", "Docker", "HashiCorp Consul"],
+        },
+      ],
     },
     {
       company: "Kentico",

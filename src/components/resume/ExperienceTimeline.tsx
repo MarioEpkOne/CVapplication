@@ -62,6 +62,34 @@ export function ExperienceTimeline({ experience, heading }: ExperienceTimelinePr
                     ))}
                   </div>
                 )}
+
+                {/* Nested commercial/client projects — gracefully omitted if absent */}
+                {entry.projects && entry.projects.length > 0 && (
+                  <div className="mt-4 space-y-4 border-l-2 border-brand-100 pl-4 dark:border-brand-800">
+                    {entry.projects.map((project, pi) => (
+                      <div key={`${project.name}-${pi}`}>
+                        <h4 className="text-sm font-semibold text-brand-800 dark:text-brand-200">
+                          {project.name}
+                        </h4>
+                        <p className="mt-1 text-sm text-brand-800 dark:text-brand-200">
+                          {project.description}
+                        </p>
+                        {project.tech.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {project.tech.map((t) => (
+                              <span
+                                key={t}
+                                className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-800 dark:text-brand-300"
+                              >
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </Reveal>
           </li>

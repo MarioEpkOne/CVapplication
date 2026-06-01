@@ -12,12 +12,19 @@ export interface ResumeHeader {
   contacts: ContactLink[];
 }
 
+export interface ExperienceProject {
+  name: string;        // e.g. "AstraZeneca — Pharmaceutical Distribution Management System"
+  description: string; // prose; team size woven in; NO dates
+  tech: string[];      // per-project tech chips
+}
+
 export interface ExperienceEntry {
   company: string;
   role: string;
   period: string;        // freeform: "2025 -- present", "2.5 years", etc.
   bullets: string[];
   tech?: string[];
+  projects?: ExperienceProject[]; // NEW — nested commercial/client projects
 }
 
 export interface SkillGroup {

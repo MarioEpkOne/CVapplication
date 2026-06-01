@@ -29,6 +29,25 @@ describe("resume data integrity", () => {
       }
     });
 
+    it("MoroSystems entry has 2 nested projects with valid fields and unchanged period", () => {
+      const moro = resume.experience.find((e) => e.company === "Morosystems");
+      expect(moro).toBeDefined();
+      // D4 regression guard: existing period preserved.
+      expect(moro!.period).toBeTruthy();
+      // D5/D2: exactly two nested projects.
+      expect(moro!.projects).toBeDefined();
+      expect(moro!.projects!.length).toBe(2);
+      // Each project has truthy name, truthy description, and >= 1 tech entry.
+      for (const project of moro!.projects!) {
+        expect(project.name).toBeTruthy();
+        expect(project.description).toBeTruthy();
+        expect(project.tech.length).toBeGreaterThanOrEqual(1);
+      }
+      // Locale-independent identity: proper nouns present, in order.
+      expect(moro!.projects![0].name).toContain("AstraZeneca");
+      expect(moro!.projects![1].name).toContain("Global Payments");
+    });
+
     it("has at least one education entry", () => {
       expect(resume.education.length).toBeGreaterThanOrEqual(1);
       for (const entry of resume.education) {
