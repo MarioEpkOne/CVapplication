@@ -24,15 +24,6 @@ export function CoverLetterContent() {
       <div className="mt-16 border-t border-brand-200 pt-8 dark:border-brand-700">
         <p className="text-brand-700 dark:text-brand-300">{l.signOff}</p>
         <p className="mt-1 font-semibold text-brand-900 dark:text-brand-100">{l.signOffName}</p>
-        <p className="mt-4 text-xs text-brand-400 dark:text-brand-500">
-          {l.flyFooter}{" "}
-          <a
-            href="/docs/adr/0001-fly-over-aws"
-            className="underline hover:text-brand-600"
-          >
-            {l.flyFooterLink}
-          </a>
-        </p>
       </div>
     </div>
   );

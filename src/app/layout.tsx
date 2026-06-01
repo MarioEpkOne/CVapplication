@@ -51,9 +51,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
                   <p>
                     Built by Mario Alina for Purple LAB.{" "}
-                    <span title="Runs on Fly.io — yes, intentionally. Ask me why." className="cursor-help">
-                      AWS shop, runs on Fly.
-                    </span>{" "}
                     <a
                       href="https://github.com/MarioEpkOne/CVapplication"
                       target="_blank"

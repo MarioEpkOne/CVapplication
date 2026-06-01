@@ -64,17 +64,6 @@ export default function OGImage() {
           Interactive Resume — AI Agent Orchestration
         </div>
 
-        {/* Wink */}
-        <div
-          style={{
-            marginTop: "32px",
-            fontSize: "16px",
-            color: "#9333ea",
-            fontStyle: "italic",
-          }}
-        >
-          AWS shop. Runs on Fly. Ask me why.
-        </div>
       </div>
     ),
     size

@@ -19,7 +19,6 @@ const EMPHASIS_KEYWORDS = [
   "spring",
   "mcp",
   "rag",
-  "fly.io",
 ];
 
 function isEmphasized(item: string): boolean {

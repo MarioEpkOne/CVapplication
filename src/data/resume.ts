@@ -127,7 +127,7 @@ export const resumeCs: ResumeData = {
       name: "Tato CV aplikace",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce pro Purple LAB. Next.js, tRPC, Drizzle, Fly.io, agent-context artefakty jako deliverable první třídy.",
+        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce pro Purple LAB. Next.js, tRPC, Drizzle, agent-context artefakty jako deliverable první třídy.",
     },
   ],
 
@@ -266,7 +266,7 @@ export const resumeEn: ResumeData = {
       name: "This CV App",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "A deliberately over-engineered interactive resume + cover letter built as a work sample for Purple LAB. Next.js, tRPC, Drizzle, Fly.io, agent-context artifacts as first-class deliverables.",
+        "A deliberately over-engineered interactive resume + cover letter built as a work sample for Purple LAB. Next.js, tRPC, Drizzle, agent-context artifacts as first-class deliverables.",
     },
   ],
 
