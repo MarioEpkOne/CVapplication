@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/server/db/migrate.ts"
+    "db:migrate": "tsx src/server/db/migrate.ts",
+    "deps:check": "madge --circular --extensions ts,tsx --ts-config tsconfig.json src/"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
@@ -45,6 +46,8 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "^16.2.6",
+    "madge": "^8.0.0",
+    "prettier": "^3.8.3",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.22.4",
     "typescript": "^5.7.2",

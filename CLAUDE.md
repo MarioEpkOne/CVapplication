@@ -26,6 +26,18 @@ npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
 
 Deploy: push to `main` → GitHub Actions → `flyctl deploy --remote-only` (needs `FLY_API_TOKEN` secret).
 
+### Quality Gate Hooks (Claude Code)
+
+Claude Code hooks enforce code quality automatically via `.claude/settings.json`:
+
+- **PostToolUse** (`format-file.sh`): Auto-formats `.ts`/`.tsx` files with ESLint --fix + Prettier after every Write/Edit/MultiEdit. Best-effort (never blocks edits).
+- **Stop** (`verify.sh`): Blocks task completion until typecheck + lint + circular-dep checks all pass. Stops on first failure.
+
+Additional command:
+```bash
+npm run deps:check   # madge circular dependency check over src/
+```
+
 ---
 
 ## Architecture
