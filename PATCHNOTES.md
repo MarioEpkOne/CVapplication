@@ -1,5 +1,19 @@
-<!-- last-commit: c471115de429ffb4f46824221e2a7e5b6d637153 -->
+<!-- last-commit: a3adca6d8c772621cc689848f90a12d7cef08ecf -->
 # Patch Notes
+
+## v0.4.0 — 2026-06-01
+
+### move projects above education and add Get in Touch link in header
+Reordered the resume layout so the Projects section appears ahead of Education, and added a "Get in touch" link to the header for quicker access to the contact form. Improves the resume's emphasis and navigation without changing any underlying content data.
+
+### add real photo and rewrite cover letter content
+Replaced placeholder imagery with a real profile photo and rewrote the cover letter copy in the cover-letter data source. Affects only the content layer (data files); rendering and structure are unchanged.
+
+### remove AWS/Fly.io jokes and dead ADR link from UI
+Cleaned up the user-facing copy by removing the AWS/Fly.io in-jokes and a dead ADR link from the UI. Tightens the presentation so the public work sample reads cleanly to a hiring audience.
+
+### harden security — non-spoofable IP, analytics throttle, headers, email fix
+Closed the gaps found in the security audit: the contact rate limiter now keys on Fly's non-spoofable `Fly-Client-IP` header (closing an XFF-spoofing bypass), the analytics endpoint is throttled and sanitized to prevent unbounded DB writes, five safe HTTP security headers were added (HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy — no CSP), and contact notification emails now render plain text so apostrophes/ampersands no longer leak as HTML entities. Adds 14 new tests (47 total); no schema or dependency changes.
 
 ## v0.3.0 — 2026-06-01
 
