@@ -18,6 +18,7 @@ export const labels = {
     builtBy: "Vytvořil Mario Alina pro Purple LAB.",
     viewSource: "Zobrazit zdrojový kód",
     comingSoon: "Již brzy",
+    getInTouch: "Napište mi",
   },
   en: {
     experience: "Experience",
@@ -38,6 +39,7 @@ export const labels = {
     builtBy: "Built by Mario Alina for Purple LAB.",
     viewSource: "View source",
     comingSoon: "Coming soon.",
+    getInTouch: "Get in Touch",
   },
 } as const;
 

@@ -18,7 +18,7 @@ export function ResumeContent() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-8">
-      <ResumeHeader header={data.header} />
+      <ResumeHeader header={data.header} getInTouchLabel={l.getInTouch} />
 
       <ProfileSummary summary={data.summary} heading={l.profile} />
 

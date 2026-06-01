@@ -1,7 +1,7 @@
 import { Avatar } from "./Avatar";
 import { PrintButton } from "./PrintButton";
 import type { ResumeHeader as ResumeHeaderData } from "@/data/resume.types";
-import { Mail, GitBranch, Link2, Globe, MapPin } from "lucide-react";
+import { Mail, GitBranch, Link2, Globe, MapPin, MessageCircle } from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
   email: Mail,
@@ -12,9 +12,10 @@ const iconMap: Record<string, React.ElementType> = {
 
 interface ResumeHeaderProps {
   header: ResumeHeaderData;
+  getInTouchLabel: string;
 }
 
-export function ResumeHeader({ header }: ResumeHeaderProps) {
+export function ResumeHeader({ header, getInTouchLabel }: ResumeHeaderProps) {
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-start">
       {/* Photo (circular) */}
@@ -51,6 +52,15 @@ export function ResumeHeader({ header }: ResumeHeaderProps) {
               </li>
             );
           })}
+          <li className="no-print">
+            <a
+              href="#contact"
+              className="flex items-center gap-1 text-sm font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+            >
+              <MessageCircle size={12} aria-hidden />
+              {getInTouchLabel}
+            </a>
+          </li>
         </ul>
 
         {/* Print / PDF button — client component, hidden in print */}
