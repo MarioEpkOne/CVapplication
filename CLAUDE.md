@@ -47,8 +47,11 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 
 | File | Purpose |
 |------|---------|
-| `src/data/resume.ts` | **Single source of truth** for all resume content. Mario edits this. |
-| `src/data/cover-letter.ts` | **Single source of truth** for all cover letter sections. |
+| `src/data/resume.ts` | **Single source of truth** for all resume content. Exports `resumeCs`, `resumeEn`, and `resumes` map. |
+| `src/data/cover-letter.ts` | **Single source of truth** for all cover letter sections. Exports `letterSectionsCz`, `letterSectionsEn`, and `letterSections` map. |
+| `src/lib/locale.tsx` | React context for CZ/EN locale switching with localStorage persistence. |
+| `src/lib/labels.ts` | All UI chrome strings (section headings, tab labels, etc.) mapped by locale. |
+| `src/components/LocaleToggle.tsx` | CZ/EN toggle button, placed next to ThemeToggle. Has `.no-print`. |
 | `src/server/routers/contact.ts` | Contact mutation — read the ordering comments; it's authoritative. |
 | `src/server/validation/contact.ts` | Zod schema + exported caps (NAME_MAX, MESSAGE_MAX). |
 | `src/server/services/rate-limit.ts` | In-memory per-IP rate limiter; singleton exported as `contactRateLimiter`. |
@@ -65,6 +68,7 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 ### Data-file-is-source-of-truth rule (hard constraint)
 - Resume content renders **only** from `src/data/resume.ts`. Zero hard-coded strings in JSX.
 - Cover letter content renders **only** from `src/data/cover-letter.ts`. Zero hard-coded content in components.
+- UI labels (section headings, tab labels) are sourced from `src/lib/labels.ts`.
 - Violating this makes print/PDF and data-integrity tests unreliable.
 
 ### Tailwind v4 (CSS-first — no tailwind.config.js)
@@ -92,7 +96,7 @@ trpc.createClient({ transformer: superjson }) // ← don't do this
 A filled honeypot is **not** a Zod validation error. The schema accepts any string; the router silently returns `{ ok: true }` without storing or emailing. Never reveal the trap.
 
 ### Print CSS
-`.no-print` class hides: TabBar, ThemeToggle, PrintButton, ContactForm, AnalyticsPing, footer. Print CSS forces light colors regardless of dark mode. Do not remove `.no-print` from these components.
+`.no-print` class hides: TabBar, ThemeToggle, LocaleToggle, PrintButton, ContactForm, AnalyticsPing, footer. Print CSS forces light colors regardless of dark mode. Do not remove `.no-print` from these components.
 
 ---
 
@@ -124,6 +128,7 @@ Reference `.env.example` for the full list. **Never commit real values.**
 ## Known limitations / gotchas
 
 - **In-memory rate limiter** (`contactRateLimiter`) resets on machine restart. Acceptable for single-machine Fly deployment (D24). If horizontal scaling is added, replace with Redis or a DB-backed store.
+- **In-memory locale context** resets to `"cs"` default on SSR; localStorage restores the user's choice on mount (handled in `LocaleProvider`'s `useEffect`).
 - **`next lint` was removed in Next 16.** The lint script runs ESLint directly: `eslint src/ --max-warnings=0`.
 - **`lucide-react@1.x` does not export `Github` or `Linkedin` icons** — use `GitBranch` and `Link2` instead.
 - **`tsconfig.json` `jsx` is set to `react-jsx` by Next.js build** — this is correct; don't revert to `preserve`.

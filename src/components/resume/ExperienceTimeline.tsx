@@ -5,16 +5,10 @@ import type { ExperienceEntry } from "@/data/resume.types";
 
 interface ExperienceTimelineProps {
   experience: ExperienceEntry[];
+  heading: string;
 }
 
-function formatDate(ym: string): string {
-  if (ym === "present") return "Present";
-  const [year, month] = ym.split("-");
-  const date = new Date(Number(year), Number(month) - 1);
-  return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-}
-
-export function ExperienceTimeline({ experience }: ExperienceTimelineProps) {
+export function ExperienceTimeline({ experience, heading }: ExperienceTimelineProps) {
   if (!experience || experience.length === 0) return null;
 
   return (
@@ -23,11 +17,11 @@ export function ExperienceTimeline({ experience }: ExperienceTimelineProps) {
         id="experience-heading"
         className="mb-4 text-xl font-bold text-brand-800 dark:text-brand-200"
       >
-        Experience
+        {heading}
       </h2>
       <ol className="relative border-l-2 border-brand-200 dark:border-brand-700">
         {experience.map((entry, i) => (
-          <li key={`${entry.company}-${entry.start}`} className="mb-8 ml-6">
+          <li key={`${entry.company}-${i}`} className="mb-8 ml-6">
             {/* Timeline dot */}
             <span className="absolute -left-[9px] mt-1.5 h-4 w-4 rounded-full border-2 border-brand-400 bg-brand-bg dark:border-brand-500 dark:bg-brand-900" />
 
@@ -41,10 +35,12 @@ export function ExperienceTimeline({ experience }: ExperienceTimelineProps) {
                   <span className="text-brand-600 dark:text-brand-400">@ {entry.company}</span>
                 </div>
 
-                {/* Dates */}
-                <time className="mb-2 block text-sm text-brand-500 dark:text-brand-400">
-                  {formatDate(entry.start)} — {formatDate(entry.end)}
-                </time>
+                {/* Period — conditionally rendered */}
+                {entry.period && (
+                  <time className="mb-2 block text-sm text-brand-500 dark:text-brand-400">
+                    {entry.period}
+                  </time>
+                )}
 
                 {/* Bullets */}
                 <ul className="list-disc space-y-1 pl-4 text-sm text-brand-800 dark:text-brand-200">

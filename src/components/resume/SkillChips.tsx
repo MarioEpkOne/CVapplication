@@ -3,22 +3,23 @@ import { cn } from "@/lib/utils";
 
 interface SkillChipsProps {
   skills: SkillGroup[];
+  heading: string;
 }
 
-// Items that warrant emphasis styling — TS/Node/AWS/AI tooling keywords
+// Items that warrant emphasis styling
 const EMPHASIS_KEYWORDS = [
   "typescript",
   "ts",
   "node",
   "node.js",
-  "aws",
   "ai",
   "claude",
-  "openai",
-  "anthropic",
-  "devin",
-  "cursor",
-  "coderabbit",
+  "java",
+  "kotlin",
+  "spring",
+  "mcp",
+  "rag",
+  "fly.io",
 ];
 
 function isEmphasized(item: string): boolean {
@@ -26,7 +27,7 @@ function isEmphasized(item: string): boolean {
   return EMPHASIS_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-export function SkillChips({ skills }: SkillChipsProps) {
+export function SkillChips({ skills, heading }: SkillChipsProps) {
   if (!skills || skills.length === 0) return null;
 
   return (
@@ -35,7 +36,7 @@ export function SkillChips({ skills }: SkillChipsProps) {
         id="skills-heading"
         className="mb-4 text-xl font-bold text-brand-800 dark:text-brand-200"
       >
-        Skills
+        {heading}
       </h2>
       <div className="space-y-3">
         {skills.map((group) => (

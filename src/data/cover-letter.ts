@@ -1,22 +1,64 @@
 // Cover letter data — config-driven so sections reorder/add/remove freely.
-// Mario: replace the placeholder body copy with your actual words.
-// The structure (id, heading, body[]) is fixed; everything else is yours to own.
+// The structure (id, heading, body[]) is fixed; locale map selects the right version.
 
 export interface LetterSection {
   id: "hook" | "orchestration" | "why-purple" | "why-me" | string;
   eyebrow?: string;
   heading: string;
-  body: string[]; // paragraphs — Mario writes these
+  body: string[]; // paragraphs
 }
 
-export const letterSections: LetterSection[] = [
+// ─── Czech cover letter ───────────────────────────────────────────────────────
+
+export const letterSectionsCz: LetterSection[] = [
+  {
+    id: "hook",
+    eyebrow: "Teze",
+    heading: "Médium je sdělení.",
+    body: [
+      "Nečtete jen můj motivační dopis — prohlížíte si ho. Tento web je ukázka práce: záměrně přeinženýrovaná Next.js aplikace, nasazená na reálném CI/CD pipeline, dokumentovaná pro AI agenty jako deliverable první třídy. Kód argumentuje lépe než jakákoli próza.",
+      "K AI agentním přístupům jsem přišel nezávisle — ne proto, že to byl trend, ale proto, že jsem potřeboval vyřešit konkrétní problémy a agentní pipeline byla ta správná odpověď.",
+    ],
+  },
+  {
+    id: "orchestration",
+    eyebrow: "Práce",
+    heading: "Orchestrace AI agentů je disciplína, ne zkratka.",
+    body: [
+      "Strávil jsem poslední rok budováním uzavřených pipeline, kde agenti plánují, implementují, revidují a commitují kód — s jasnou dekompozicí úkolů, review gates a kontextovými artefakty (CLAUDE.md, AGENTS.md, Implementation Plans) jako infrastrukturou.",
+      "Vím, kdy agentovi říct 'pokračuj' a kdy 'vrať se zpět'. Agenti píší; já zasílám to, co stojí za zaslání.",
+    ],
+  },
+  {
+    id: "why-purple",
+    eyebrow: "Proč Purple LAB",
+    heading: "Technická analýza předchází psaní kódu.",
+    body: [
+      "Přistupuji k problémům se stejnou rigorozitou, jakou vidím v přístupu Purple LAB: nejdřív porozumět systému, pak navrhovat řešení. Dokumentuji architektonická rozhodnutí (ADR), definuji scope před implementací a nezačínám psát kód, dokud není jasný záměr.",
+      "Vy jste Next.js + TypeScript + tRPC shop. Tato aplikace také. To nebyla náhoda.",
+    ],
+  },
+  {
+    id: "why-me",
+    eyebrow: "Proč já",
+    heading: "Důkaz před slibem.",
+    body: [
+      "Toto repo má CLAUDE.md, AGENTS.md a čtyři ADR. To není ozdoba životopisu — takto skutečně pracuji. Agent context jako infrastruktura je disciplína, kterou tato role oceňuje, a já z ní udělal základ této přihlášky.",
+      "Jsem z Brna, takže jsem ve vaší časové zóně a mohu být ve vaší kanceláři. A ano — aplikace běží na Fly.io, ne na AWS. ADR vysvětluje proč. Myslím, že to shledáte upřímným.",
+    ],
+  },
+];
+
+// ─── English cover letter ─────────────────────────────────────────────────────
+
+export const letterSectionsEn: LetterSection[] = [
   {
     id: "hook",
     eyebrow: "The thesis",
     heading: "The medium is the message.",
     body: [
       "You're not just reading my cover letter — you're looking at it. This site is a work sample: a deliberately over-engineered Next.js app, shipped on a real CI/CD pipeline, documented for AI agents as a first-class deliverable. The code argues the point better than any prose could.",
-      "I'm applying for a role centered on orchestrating and reviewing AI coding agents. So I built my application with them.",
+      "I arrived at agentic approaches independently — not because it was a trend, but because I needed to solve concrete problems and agent pipelines were the right answer.",
     ],
   },
   {
@@ -24,17 +66,17 @@ export const letterSections: LetterSection[] = [
     eyebrow: "The work",
     heading: "Orchestrating AI agents is a discipline, not a shortcut.",
     body: [
-      "I've spent the past year building the review layer that makes AI agents useful in production: clear task decomposition, review gates, the judgment to know when to re-prompt and when to revert. The agent writes; I ship what's worth shipping.",
-      "The tools I rely on — Claude Code for complex refactors, CodeRabbit on every PR, Cursor for in-editor speed — each have a distinct strength. Knowing which to reach for, and when to override them, is the actual skill.",
+      "I've spent the past year building closed-loop pipelines where agents plan, implement, review, and commit code — with clear task decomposition, review gates, and contextual artifacts (CLAUDE.md, AGENTS.md, Implementation Plans) as infrastructure.",
+      "I know when to tell an agent to continue and when to tell it to revert. The agent writes; I ship what's worth shipping.",
     ],
   },
   {
     id: "why-purple",
     eyebrow: "Why Purple LAB",
-    heading: "A FinTech scale that changes what 'careful' means.",
+    heading: "Technical analysis precedes writing code.",
     body: [
-      "Purple processes transactions that matter. That's not a constraint on moving fast — it's the thing that makes moving fast interesting. Getting agents to ship reliable FinTech code requires the kind of review discipline I've already had to build.",
-      "You're also a Next.js + TypeScript + tRPC shop. So is this app. That wasn't an accident.",
+      "I approach problems with the same rigour I see in Purple LAB's way of working: understand the system first, then design solutions. I document architectural decisions (ADRs), define scope before implementation, and don't start writing code until the intent is clear.",
+      "You're a Next.js + TypeScript + tRPC shop. So is this app. That wasn't an accident.",
     ],
   },
   {
@@ -47,3 +89,7 @@ export const letterSections: LetterSection[] = [
     ],
   },
 ];
+
+// ─── Locale map ───────────────────────────────────────────────────────────────
+
+export const letterSections = { cs: letterSectionsCz, en: letterSectionsEn } as const;

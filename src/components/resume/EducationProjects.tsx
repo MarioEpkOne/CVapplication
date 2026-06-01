@@ -4,9 +4,11 @@ import { ExternalLink } from "lucide-react";
 interface EducationProjectsProps {
   education: EducationEntry[];
   projects?: ProjectEntry[];
+  educationHeading: string;
+  projectsHeading: string;
 }
 
-export function EducationProjects({ education, projects }: EducationProjectsProps) {
+export function EducationProjects({ education, projects, educationHeading, projectsHeading }: EducationProjectsProps) {
   return (
     <div className="grid gap-8 sm:grid-cols-2">
       {/* Education */}
@@ -15,7 +17,7 @@ export function EducationProjects({ education, projects }: EducationProjectsProp
           id="education-heading"
           className="mb-3 text-xl font-bold text-brand-800 dark:text-brand-200"
         >
-          Education
+          {educationHeading}
         </h2>
         {education.length === 0 ? null : (
           <ul className="space-y-3">
@@ -41,7 +43,7 @@ export function EducationProjects({ education, projects }: EducationProjectsProp
             id="projects-heading"
             className="mb-3 text-xl font-bold text-brand-800 dark:text-brand-200"
           >
-            Projects
+            {projectsHeading}
           </h2>
           <ul className="space-y-3">
             {projects.map((project, i) => (

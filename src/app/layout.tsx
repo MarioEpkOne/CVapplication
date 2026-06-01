@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TRPCProvider } from "@/lib/trpc/Provider";
+import { LocaleProvider } from "@/lib/locale";
 import { TabBar } from "@/components/TabBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LocaleToggle } from "@/components/LocaleToggle";
 import { AnalyticsPing } from "@/components/AnalyticsPing";
 import "./globals.css";
 
@@ -32,37 +34,40 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html lang="cs" suppressHydrationWarning className={inter.variable}>
       <body>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem storageKey="theme">
-          <TRPCProvider>
-            <div className="flex min-h-screen flex-col">
-              <header className="flex items-center justify-between pr-4">
-                <TabBar />
-                <div className="no-print flex-shrink-0">
-                  <ThemeToggle />
-                </div>
-              </header>
-              <main className="flex-1">{children}</main>
-              <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
-                <p>
-                  Built by Mario Alina for Purple LAB.{" "}
-                  <span title="Runs on Fly.io — yes, intentionally. Ask me why." className="cursor-help">
-                    AWS shop, runs on Fly.
-                  </span>{" "}
-                  <a
-                    href="https://github.com/marioalina/CVapplication"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline hover:text-brand-700"
-                  >
-                    View source
-                  </a>
-                </p>
-              </footer>
-              <AnalyticsPing />
-            </div>
-          </TRPCProvider>
+          <LocaleProvider>
+            <TRPCProvider>
+              <div className="flex min-h-screen flex-col">
+                <header className="flex items-center justify-between pr-4">
+                  <TabBar />
+                  <div className="no-print flex items-center gap-1 flex-shrink-0">
+                    <LocaleToggle />
+                    <ThemeToggle />
+                  </div>
+                </header>
+                <main className="flex-1">{children}</main>
+                <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
+                  <p>
+                    Built by Mario Alina for Purple LAB.{" "}
+                    <span title="Runs on Fly.io — yes, intentionally. Ask me why." className="cursor-help">
+                      AWS shop, runs on Fly.
+                    </span>{" "}
+                    <a
+                      href="https://github.com/MarioEpkOne/CVapplication"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-brand-700"
+                    >
+                      View source
+                    </a>
+                  </p>
+                </footer>
+                <AnalyticsPing />
+              </div>
+            </TRPCProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

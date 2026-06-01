@@ -15,8 +15,7 @@ export interface ResumeHeader {
 export interface ExperienceEntry {
   company: string;
   role: string;
-  start: string; // ISO 'YYYY-MM'
-  end: string | "present";
+  period: string;        // freeform: "2025 -- present", "2.5 years", etc.
   bullets: string[];
   tech?: string[];
 }
@@ -39,6 +38,11 @@ export interface ProjectEntry {
   blurb: string;
 }
 
+export interface CertificationEntry {
+  name: string;
+  issuer?: string;
+}
+
 export interface LanguageEntry {
   name: string;
   level: string;
@@ -46,9 +50,11 @@ export interface LanguageEntry {
 
 export interface ResumeData {
   header: ResumeHeader;
+  summary: string;                       // profile/summary section
   experience: ExperienceEntry[];
   skills: SkillGroup[];
   education: EducationEntry[];
+  certifications: CertificationEntry[];  // courses & certifications
   projects?: ProjectEntry[];
   languages?: LanguageEntry[];
 }
