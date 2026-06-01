@@ -1,5 +1,10 @@
-<!-- last-commit: a3adca6d8c772621cc689848f90a12d7cef08ecf -->
+<!-- last-commit: 345aae3befa5326cabcf76ac8e9244b601472b9f -->
 # Patch Notes
+
+## v0.5.0 — 2026-06-01
+
+### add AstraZeneca and Global Payments projects to MoroSystems experience
+Expanded the MoroSystems entry in the Resume's Experience timeline to showcase two commercial client projects — AstraZeneca's pharmaceutical distribution system and the Global Payments card-issuing platform — each with a description and its own technology chips, in both Czech and English. Introduced an optional nested `projects` field on the experience data model so the timeline component renders these per-project details without affecting any other entry.
 
 ## v0.4.0 — 2026-06-01
 
