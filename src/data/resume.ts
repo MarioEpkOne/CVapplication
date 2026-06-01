@@ -79,7 +79,7 @@ export const resumeCs: ResumeData = {
     },
     {
       group: "Proces & spolupráce",
-      items: ["dekompozice procesu", "root-cause analýza", "code review", "agile/scrum", "technická dokumentace"],
+      items: ["dekompozice procesů", "root-cause analýza", "code review", "agile/scrum", "technická dokumentace"],
     },
   ],
 

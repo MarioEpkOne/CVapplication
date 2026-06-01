@@ -10,7 +10,7 @@ export const labels = {
     resume: "Životopis",
     coverLetter: "Motivační dopis",
     play: "Hřiště",
-    greeting: "Vážený tyme Purple LAB,",
+    greeting: "Vážený týme Purple LAB,",
     signOff: "S upřímným nadšením,",
     signOffName: "Mario Alina",
     flyFooter: "AWS firma, běží na Fly.",

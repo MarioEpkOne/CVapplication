@@ -19,7 +19,7 @@ npm run dev          # Start dev server (Next.js / Turbopack)
 npm run build        # Production build → .next/standalone
 npm run lint         # ESLint (src/ only; no next lint — removed in Next 16)
 npm run typecheck    # tsc --noEmit
-npm run test         # vitest run (23 tests)
+npm run test         # vitest run (33 tests)
 npm run db:generate  # drizzle-kit generate → drizzle/ SQL migration
 npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
 ```
