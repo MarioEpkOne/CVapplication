@@ -50,7 +50,15 @@ export const contactRouter = router({
       }
 
       // 5. Email (failure-tolerant; never throws).
-      const res = await sendContactNotification({ name, email, message, company });
+      // Pass RAW input — email.ts cleans via toPlainText (trim/truncate/strip
+      // control chars, NO HTML escaping), so the email reads naturally while the
+      // DB above keeps the escaped values. Never used in an HTML context.
+      const res = await sendContactNotification({
+        name: input.name,
+        email: input.email,
+        message: input.message,
+        company: input.company,
+      });
       if (!res.sent) console.warn("[contact] email not sent:", res.reason);
 
       return { ok: true as const };

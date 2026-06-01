@@ -51,3 +51,14 @@ export function createRateLimiter(config: RateLimitConfig = DEFAULT_RATE_LIMIT):
  * Resets on server restart (known limitation — documented above).
  */
 export const contactRateLimiter = createRateLimiter();
+
+/**
+ * Config + module-level singleton for the analytics endpoint.
+ *
+ * Generous limit (30 pageviews/min/IP): the client already dedupes per-path per
+ * session, so real navigation is never throttled, while abuse is capped at
+ * ~43k rows/day/IP instead of unbounded (disk-fill DoS protection). Separate
+ * instance so its state never shares the strict contact bucket.
+ */
+export const ANALYTICS_RATE_LIMIT: RateLimitConfig = { windowMs: 60_000, max: 30 };
+export const analyticsRateLimiter = createRateLimiter(ANALYTICS_RATE_LIMIT);

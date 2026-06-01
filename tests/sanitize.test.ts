@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeText, sanitizeName, sanitizeMessage } from "@/server/services/sanitize";
+import {
+  sanitizeText,
+  sanitizeName,
+  sanitizeMessage,
+  toPlainText,
+} from "@/server/services/sanitize";
 
 describe("sanitizeText", () => {
   it("strips control characters", () => {
@@ -49,5 +54,43 @@ describe("sanitizeName / sanitizeMessage convenience wrappers", () => {
   it("sanitizeMessage calls sanitizeText with MESSAGE_MAX", () => {
     const result = sanitizeMessage("  Hello world  ");
     expect(result).toBe("Hello world");
+  });
+});
+
+describe("toPlainText", () => {
+  it("does NOT HTML-escape special characters", () => {
+    const input = `Mario's <b>"AT&T"</b> & co > x`;
+    const result = toPlainText(input, 1000);
+    expect(result).toContain("'");
+    expect(result).toContain("&");
+    expect(result).toContain("<");
+    expect(result).toContain(">");
+    expect(result).toContain('"');
+    expect(result).not.toContain("&#x27;");
+    expect(result).not.toContain("&amp;");
+    expect(result).not.toContain("&lt;");
+  });
+
+  it("strips C0 control chars but preserves \\n and \\t by default", () => {
+    const input = "line1\nline2\tend\x00\x07";
+    const result = toPlainText(input, 1000);
+    expect(result).toContain("\n");
+    expect(result).toContain("\t");
+    expect(result).not.toContain("\x00");
+    expect(result).not.toContain("\x07");
+  });
+
+  it("strips \\n and \\t when singleLine is true", () => {
+    const input = "name\nwith\ttabs";
+    const result = toPlainText(input, 1000, { singleLine: true });
+    expect(result).not.toContain("\n");
+    expect(result).not.toContain("\t");
+    expect(result).toBe("namewithtabs");
+  });
+
+  it("trims and truncates to maxLen", () => {
+    const result = toPlainText("   " + "a".repeat(10) + "   ", 5);
+    expect(result).toBe("aaaaa");
+    expect(result.length).toBeLessThanOrEqual(5);
   });
 });

@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { toPlainText } from "./sanitize";
 
 let resendClient: Resend | null = null;
 let warnedNoKey = false;
@@ -48,15 +49,25 @@ export async function sendContactNotification(payload: ContactPayload): Promise<
     process.env.RESEND_FROM ?? "onboarding@resend.dev";
   const to = process.env.CONTACT_NOTIFY_TO ?? "mario.alina11@gmail.com";
 
+  // Derive plaintext (un-escaped) values for the email only. The DB keeps the
+  // HTML-escaped values; here we want a human to read `Mario's`, not `Mario&#x27;s`.
+  // The subject must be single-line (a newline in name would mangle it).
+  const name = toPlainText(payload.name, 120, { singleLine: true });
+  const email = toPlainText(payload.email, 254, { singleLine: true });
+  const company = payload.company
+    ? toPlainText(payload.company, 200, { singleLine: true })
+    : null;
+  const message = toPlainText(payload.message, 5000); // keep newlines
+
   const body = [
     `New contact form submission`,
     ``,
-    `Name:    ${payload.name}`,
-    `Email:   ${payload.email}`,
-    payload.company ? `Company: ${payload.company}` : null,
+    `Name:    ${name}`,
+    `Email:   ${email}`,
+    company ? `Company: ${company}` : null,
     ``,
     `Message:`,
-    payload.message,
+    message,
   ]
     .filter((line) => line !== null)
     .join("\n");
@@ -65,7 +76,7 @@ export async function sendContactNotification(payload: ContactPayload): Promise<
     const result = await client.emails.send({
       from,
       to,
-      subject: `[CV Contact] Message from ${payload.name}`,
+      subject: `[CV Contact] Message from ${name}`,
       text: body,
     });
 

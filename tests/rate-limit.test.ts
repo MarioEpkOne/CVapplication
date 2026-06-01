@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { createRateLimiter } from "@/server/services/rate-limit";
+import {
+  createRateLimiter,
+  ANALYTICS_RATE_LIMIT,
+  analyticsRateLimiter,
+} from "@/server/services/rate-limit";
 
 describe("createRateLimiter", () => {
   it("allows up to max requests within the window", () => {
@@ -40,5 +44,32 @@ describe("createRateLimiter", () => {
     const later = now + 1001;
     const result = limiter.check("1.2.3.4", later);
     expect(result.allowed).toBe(true);
+  });
+});
+
+describe("analyticsRateLimiter", () => {
+  it("has the documented config (30/min)", () => {
+    expect(ANALYTICS_RATE_LIMIT.windowMs).toBe(60_000);
+    expect(ANALYTICS_RATE_LIMIT.max).toBe(30);
+  });
+
+  it("allows 30 requests then blocks the 31st within the window", () => {
+    const ip = "analytics-test-1";
+    const now = 2_000_000;
+    for (let i = 0; i < 30; i++) {
+      expect(analyticsRateLimiter.check(ip, now).allowed).toBe(true);
+    }
+    expect(analyticsRateLimiter.check(ip, now).allowed).toBe(false);
+  });
+
+  it("re-allows after the window slides", () => {
+    const ip = "analytics-test-2";
+    const now = 3_000_000;
+    for (let i = 0; i < 30; i++) {
+      analyticsRateLimiter.check(ip, now);
+    }
+    expect(analyticsRateLimiter.check(ip, now).allowed).toBe(false);
+    // Advance past windowMs (60_000ms)
+    expect(analyticsRateLimiter.check(ip, now + 60_001).allowed).toBe(true);
   });
 });
