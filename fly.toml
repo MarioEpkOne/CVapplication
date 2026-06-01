@@ -1,0 +1,33 @@
+# fly.toml — Fly.io deployment config
+# App name: set to a real name before first deploy (e.g. mario-cv-purple)
+# Region: fra (Frankfurt) — closest to Brno; alternative is waw (Warsaw).
+# See docs/adr/0001-fly-over-aws.md for the region rationale.
+
+app = "mario-cv-purple"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  min_machines_running = 1
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "data"
+  destination = "/data"
+
+[env]
+  DATABASE_PATH = "/data/app.db"
+  PORT = "3000"
+  # Non-secret env only. Set these via `flyctl secrets set`:
+  #   RESEND_API_KEY=...
+  #   NEXT_PUBLIC_SITE_URL=https://your-domain.example
+  #   CONTACT_NOTIFY_TO=mario.alina11@gmail.com

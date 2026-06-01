@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+/* Dark mode via next-themes attribute="class" — Tailwind v4 CSS-first */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Brand tokens — Mario: pull exact values from Purple's site via DevTools ─── */
+@theme {
+  /* Light background — Purple brand first impression */
+  --color-brand-bg: #f5ecff;
+
+  /* Purple accent scale (placeholders — Mario to refine from Purple's site) */
+  --color-brand-50:  #faf5ff;
+  --color-brand-100: #f3e8ff;
+  --color-brand-200: #e9d5ff;
+  --color-brand-300: #d8b4fe;
+  --color-brand-400: #c084fc;
+  --color-brand-500: #a855f7;
+  --color-brand-600: #9333ea;
+  --color-brand-700: #7c3aed;
+  --color-brand-800: #6b21a8;
+  --color-brand-900: #581c87;
+
+  /* Font tokens */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Base layer ─── */
+@layer base {
+  body {
+    background: var(--color-brand-bg);
+    color: #1a1a1a;
+    font-family: var(--font-sans);
+  }
+
+  /* Dark mode body overrides */
+  .dark body {
+    background: #0f0a1a;
+    color: #f0e8ff;
+  }
+}
+
+/* ─── Reduced motion (belt-and-braces; Framer Motion also gated in JS) ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ─── Print CSS ─── */
+/* Hide app chrome; force light colors; clean single-purpose CV */
+@media print {
+  html {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Hide: TabBar, ThemeToggle, Download-PDF button, ContactForm,
+     AnalyticsPing wrapper, footer wink — all carry .no-print */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force light colors on any dark-mode elements that sneak through */
+  * {
+    color: #000 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}

@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+data
+*.db
+*.db-journal
+*.sqlite
+.env
+.env.local
+.env*.local
+Implementation Plans
+Working Logs
+specs
+*.log
+coverage
+.fly
