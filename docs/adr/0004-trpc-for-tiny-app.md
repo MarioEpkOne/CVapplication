@@ -7,11 +7,10 @@
 
 ## Context
 
-The app has exactly two backend mutations:
-- `contact.submit` — contact form submission
+The app has one backend mutation:
 - `analytics.track` — pageview ping
 
-For two mutations on a personal portfolio site, REST routes or simple server actions would work. tRPC is a heavier choice.
+(A `contact.submit` mutation existed earlier; the contact form was removed — see the spec in `specs/applied/`.) For a single mutation on a personal portfolio site, REST routes or simple server actions would work. tRPC is a heavier choice.
 
 ---
 
@@ -29,16 +28,16 @@ Purple Technology uses tRPC (it's part of their application-layer stack). Using 
 
 ### End-to-end type safety with zero boilerplate
 
-The contact form's input type is inferred from the same Zod schema that validates on the server. No type duplication, no OpenAPI spec, no code generation step. The TypeScript compiler catches mismatches at build time.
+The `analytics.track` input type is inferred from the same Zod schema that validates on the server. No type duplication, no OpenAPI spec, no code generation step. The TypeScript compiler catches mismatches at build time.
 
 ```ts
 // The type flows from server to client automatically
-trpc.contact.submit.useMutation() // ← fully typed from contactRouter.submit
+trpc.analytics.track.useMutation() // ← fully typed from analyticsRouter.track
 ```
 
 ### Structured error handling
 
-tRPC error codes (`TOO_MANY_REQUESTS`, `INTERNAL_SERVER_ERROR`) map cleanly to client-side conditional logic. The `ContactForm` checks `err.data?.code === "TOO_MANY_REQUESTS"` to show the friendly retry message.
+tRPC error codes (`TOO_MANY_REQUESTS`, `INTERNAL_SERVER_ERROR`) map cleanly to client-side conditional logic when a mutation needs to surface a friendly message.
 
 ### Batch link is free
 

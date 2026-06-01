@@ -17,10 +17,9 @@ This is a deliberately over-engineered interactive resume + cover letter, built 
 ### Features
 - **Print-to-PDF**: browser print with CSS that hides UI chrome and forces light colors
 - **Dark mode**: default light (`#f5ecff` Purple brand), toggle persists to localStorage
-- **Contact form**: zod + honeypot + per-IP rate limit + sanitize + Drizzle insert + Resend email
 - **Cookieless analytics**: first-party pageview tRPC ping to SQLite — no third-party, no cookie banner
 - **OG image**: branded purple card via `next/og`
-- **Vitest suite**: 23 tests covering contact schema, sanitization, rate-limit, and data integrity
+- **Vitest suite**: covers sanitization, rate-limit, and data integrity
 
 ---
 
@@ -28,14 +27,14 @@ This is a deliberately over-engineered interactive resume + cover letter, built 
 
 ```bash
 npm install
-cp .env.example .env.local  # Fill in values (RESEND_API_KEY optional for dev)
+cp .env.example .env.local  # Fill in values
 npm run dev                  # http://localhost:3000
 ```
 
 ```bash
 npm run db:generate          # Generate SQL migration from schema
 npm run db:migrate           # Apply migrations to ./data/app.db
-npm test                     # Run 23 Vitest tests
+npm test                     # Run the Vitest suite
 npm run build                # Production build → .next/standalone
 ```
 
@@ -45,7 +44,7 @@ npm run build                # Production build → .next/standalone
 
 1. `flyctl launch` (first time) — uses `fly.toml` in this repo
 2. `flyctl volumes create data --size 1` — SQLite volume
-3. `flyctl secrets set RESEND_API_KEY=... NEXT_PUBLIC_SITE_URL=... CONTACT_NOTIFY_TO=...`
+3. `flyctl secrets set NEXT_PUBLIC_SITE_URL=...`
 4. Push to `main` → GitHub Actions → `flyctl deploy --remote-only` (needs `FLY_API_TOKEN` secret)
 
 Migration runs automatically on container start via `scripts/start.sh` → `scripts/migrate.mjs`.

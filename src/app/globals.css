@@ -62,7 +62,7 @@
     color: #000 !important;
   }
 
-  /* Hide: TabBar, ThemeToggle, Download-PDF button, ContactForm,
+  /* Hide: TabBar, ThemeToggle, Download-PDF button,
      AnalyticsPing wrapper, footer wink — all carry .no-print */
   .no-print {
     display: none !important;

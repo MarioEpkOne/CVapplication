@@ -22,6 +22,20 @@ describe("resume data integrity", () => {
       }
     });
 
+    it("exposes no email contact and includes github + linkedin (form removed)", () => {
+      // D2/D3: no email may be exposed in the header after the contact form removal.
+      const kinds = resume.header.contacts.map((c) => c.kind);
+      expect(kinds).not.toContain("email");
+      expect(kinds).toContain("github");
+      expect(kinds).toContain("linkedin");
+      // Belt-and-braces: no mailto: href, no literal email address.
+      for (const c of resume.header.contacts) {
+        expect(c.href.startsWith("mailto:")).toBe(false);
+        expect(c.href).not.toContain("mario.alina11@gmail.com");
+        expect(c.label).not.toContain("mario.alina11@gmail.com");
+      }
+    });
+
     it("has >= 3 experience entries with truthy period", () => {
       expect(resume.experience.length).toBeGreaterThanOrEqual(3);
       for (const entry of resume.experience) {

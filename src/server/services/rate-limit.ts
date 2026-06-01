@@ -47,12 +47,6 @@ export function createRateLimiter(config: RateLimitConfig = DEFAULT_RATE_LIMIT):
 }
 
 /**
- * Module-level singleton for the contact endpoint.
- * Resets on server restart (known limitation — documented above).
- */
-export const contactRateLimiter = createRateLimiter();
-
-/**
  * Config + module-level singleton for the analytics endpoint.
  *
  * Generous limit (30 pageviews/min/IP): the client already dedupes per-path per

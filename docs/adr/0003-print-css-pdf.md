@@ -56,7 +56,7 @@ Chrome produces the best output (PDF is a Chrome first-class feature). Firefox a
 
 ### Mitigations
 
-- Print CSS explicitly hides `.no-print` elements (TabBar, ThemeToggle, buttons, ContactForm, AnalyticsPing).
+- Print CSS explicitly hides `.no-print` elements (TabBar, ThemeToggle, buttons, AnalyticsPing).
 - Print CSS forces `html { background: #fff; color: #000; }` regardless of dark mode.
 - Recommend Chrome in the UI: "For best PDF output, print from Chrome."
 - Test in Chrome before sharing.

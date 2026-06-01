@@ -21,11 +21,10 @@ Read `CLAUDE.md` for the full architecture, commands, conventions, and gotchas.
 2. **No leaderboard table, no game logic** in this codebase — the Play tab is a placeholder. Do not add `leaderboard` to `schema.ts` or create game routes.
 3. **No `.cursor/rules`** — do not create this. Mario uses Claude Code.
 4. **Secrets never committed** — use `.env.example` for documentation; real values via Fly secrets and GitHub Actions secrets.
-5. **Contact mutation ordering is authoritative** — see `src/server/routers/contact.ts` comments. Do not reorder the 5 steps.
 
 ### Before any code change
 1. Run `npm run typecheck` — TypeScript is the safety net.
-2. Run `npm test` — 23 tests cover schema, sanitize, rate-limit, and data integrity.
+2. Run `npm test` — tests cover sanitize, rate-limit, and data integrity.
 3. Run `npm run lint` — ESLint (src/ only; `next lint` was removed in Next 16).
 
 ### Known environment facts

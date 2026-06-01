@@ -10,11 +10,6 @@ export const resumeCs: ResumeData = {
     location: "Brno, Česká republika",
     contacts: [
       {
-        kind: "email",
-        label: "mario.alina11@gmail.com",
-        href: "mailto:mario.alina11@gmail.com",
-      },
-      {
         kind: "github",
         label: "github.com/MarioEpkOne",
         href: "https://github.com/MarioEpkOne",
@@ -171,11 +166,6 @@ export const resumeEn: ResumeData = {
     photoSrc: "/photo-placeholder.svg",
     location: "Brno, Czech Republic",
     contacts: [
-      {
-        kind: "email",
-        label: "mario.alina11@gmail.com",
-        href: "mailto:mario.alina11@gmail.com",
-      },
       {
         kind: "github",
         label: "github.com/MarioEpkOne",

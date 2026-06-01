@@ -19,7 +19,7 @@ npm run dev          # Start dev server (Next.js / Turbopack)
 npm run build        # Production build → .next/standalone
 npm run lint         # ESLint (src/ only; no next lint — removed in Next 16)
 npm run typecheck    # tsc --noEmit
-npm run test         # vitest run (33 tests)
+npm run test         # vitest run
 npm run db:generate  # drizzle-kit generate → drizzle/ SQL migration
 npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
 ```
@@ -49,7 +49,6 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 │   ├── /cover-letter  → Cover Letter (scrollytelling)
 │   └── /play          → "Coming soon" placeholder
 ├── tRPC router (at /api/trpc/[trpc])
-│   ├── contact.submit  (mutation) → honeypot → rate-limit → sanitize → DB → email
 │   └── analytics.track (mutation) → pageview insert (fire-and-forget)
 ├── Drizzle ORM → SQLite at DATABASE_PATH (default: /data/app.db on Fly volume)
 └── Print CSS for PDF, OG image via next/og, dark-mode via next-themes
@@ -64,12 +63,9 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 | `src/lib/locale.tsx` | React context for CZ/EN locale switching with localStorage persistence. |
 | `src/lib/labels.ts` | All UI chrome strings (section headings, tab labels, etc.) mapped by locale. |
 | `src/components/LocaleToggle.tsx` | CZ/EN toggle button, placed next to ThemeToggle. Has `.no-print`. |
-| `src/server/routers/contact.ts` | Contact mutation — read the ordering comments; it's authoritative. |
-| `src/server/validation/contact.ts` | Zod schema + exported caps (NAME_MAX, MESSAGE_MAX). |
-| `src/server/services/rate-limit.ts` | In-memory per-IP rate limiter; singleton exported as `contactRateLimiter`. |
+| `src/server/services/rate-limit.ts` | In-memory per-IP rate limiter; singleton exported as `analyticsRateLimiter`. |
 | `src/server/services/sanitize.ts` | Pure sanitization functions — strip control chars + escape HTML. |
-| `src/server/services/email.ts` | Resend wrapper — never throws, degrades gracefully. |
-| `src/server/db/schema.ts` | Two tables only: `contact_messages` + `pageviews`. No leaderboard. |
+| `src/server/db/schema.ts` | One table: `pageviews`. No leaderboard. |
 | `src/app/globals.css` | Tailwind v4 CSS-first config — all brand tokens live here in `@theme`. |
 | `scripts/migrate.mjs` | Standalone ESM migration runner (no tsx needed at runtime). |
 
@@ -97,18 +93,8 @@ httpBatchLink({ url: "/api/trpc", transformer: superjson })
 trpc.createClient({ transformer: superjson }) // ← don't do this
 ```
 
-### Contact mutation ordering (authoritative — do not reorder)
-1. Honeypot check → silent ok (no store, no email)
-2. Rate-limit check → reject before any DB/email
-3. Sanitize
-4. DB insert (must succeed before email)
-5. Email (failure-tolerant — never throws out of sendContactNotification)
-
-### Honeypot behavior
-A filled honeypot is **not** a Zod validation error. The schema accepts any string; the router silently returns `{ ok: true }` without storing or emailing. Never reveal the trap.
-
 ### Print CSS
-`.no-print` class hides: TabBar, ThemeToggle, LocaleToggle, PrintButton, ContactForm, AnalyticsPing, footer. Print CSS forces light colors regardless of dark mode. Do not remove `.no-print` from these components.
+`.no-print` class hides: TabBar, ThemeToggle, LocaleToggle, PrintButton, AnalyticsPing, footer. Print CSS forces light colors regardless of dark mode. Do not remove `.no-print` from these components.
 
 ---
 
@@ -128,9 +114,6 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 |----------|-----------|---------|
 | `DATABASE_PATH` | `fly.toml [env]` | SQLite file path on Fly volume |
 | `NEXT_PUBLIC_SITE_URL` | `flyctl secrets set` | Canonical URL for OG metadata |
-| `RESEND_API_KEY` | `flyctl secrets set` | Email notifications (optional — app runs without it) |
-| `RESEND_FROM` | `flyctl secrets set` | Verified sender domain |
-| `CONTACT_NOTIFY_TO` | `flyctl secrets set` | Mario's notification email |
 | `FLY_API_TOKEN` | GitHub Actions secret | Deploy authorization |
 
 Reference `.env.example` for the full list. **Never commit real values.**
@@ -139,7 +122,7 @@ Reference `.env.example` for the full list. **Never commit real values.**
 
 ## Known limitations / gotchas
 
-- **In-memory rate limiter** (`contactRateLimiter`) resets on machine restart. Acceptable for single-machine Fly deployment (D24). If horizontal scaling is added, replace with Redis or a DB-backed store.
+- **In-memory rate limiter** (`analyticsRateLimiter`) resets on machine restart. Acceptable for single-machine Fly deployment (D24). If horizontal scaling is added, replace with Redis or a DB-backed store.
 - **In-memory locale context** resets to `"cs"` default on SSR; localStorage restores the user's choice on mount (handled in `LocaleProvider`'s `useEffect`).
 - **`next lint` was removed in Next 16.** The lint script runs ESLint directly: `eslint src/ --max-warnings=0`.
 - **`lucide-react@1.x` does not export `Github` or `Linkedin` icons** — use `GitBranch` and `Link2` instead.

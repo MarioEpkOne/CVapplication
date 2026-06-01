@@ -9,7 +9,6 @@ import { ExperienceTimeline } from "@/components/resume/ExperienceTimeline";
 import { SkillChips } from "@/components/resume/SkillChips";
 import { EducationProjects } from "@/components/resume/EducationProjects";
 import { Certifications } from "@/components/resume/Certifications";
-import { ContactForm } from "@/components/ContactForm";
 
 export function ResumeContent() {
   const { locale } = useLocale();
@@ -58,9 +57,30 @@ export function ResumeContent() {
 
       <hr className="border-brand-200 dark:border-brand-700" />
 
-      {/* Contact form — section anchor reachable from the Resume tab */}
+      {/* Get in touch — social links only (contact form removed; no email exposed) */}
       <section id="contact" aria-labelledby="contact-heading">
-        <ContactForm />
+        <h2
+          id="contact-heading"
+          className="mb-3 text-xl font-bold text-brand-800 dark:text-brand-200"
+        >
+          {l.getInTouch}
+        </h2>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1">
+          {data.header.contacts
+            .filter((c) => c.kind !== "email")
+            .map((c) => (
+              <li key={c.href}>
+                <a
+                  href={c.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                >
+                  {c.label}
+                </a>
+              </li>
+            ))}
+        </ul>
       </section>
     </div>
   );

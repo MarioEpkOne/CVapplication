@@ -1,4 +1,4 @@
-<!-- last-commit: 5b90b643ab8c17b0119418ff35cab9d072723e1c -->
+<!-- last-commit: b852f574f5415d964ebe6e70cfad0dedcffbe6fc -->
 # Patch Notes
 
 ## v0.6.0 — 2026-06-02
