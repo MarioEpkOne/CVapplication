@@ -1,5 +1,19 @@
-<!-- last-commit: a9594d7a105a5c653f146c59fa0d11f8fa9ebbd2 -->
+<!-- last-commit: f8662d113fd6a5abc2634905d4ca27f1b629d9f6 -->
 # Patch Notes
+
+## v0.8.0 — 2026-06-02
+
+### convert start.sh to LF and point fly.toml at mario-portfolio
+Fixed a Fly.io crash-loop (exit 127, `./scripts/start.sh: not found`) caused by CRLF line endings on the container entrypoint — Linux was trying to exec `/bin/sh\r`. The script is now LF and a `.gitattributes` rule (`*.sh text eol=lf`) prevents recurrence. The Fly app was also renamed to `mario-portfolio`.
+
+### reformat CLAUDE.md header + add WSL2 tooling
+Aligned the CLAUDE.md header with the standard Claude Code format and documented the WSL2 dev-environment tooling (AWS CLI v1, SST v4.15) used by the Play page backend, plus the `test:watch` command. Developer-facing context only — no code changes.
+
+### add "Ask the Agent" serverless Forex agent demo on Play page
+Replaced the Play page "Coming soon" placeholder with an interactive "Ask the Agent" widget backed by a real AWS Lambda (deployed via SST, `eu-central-1`). The Lambda runs a bounded Groq Llama 3.3 70B tool-calling loop over four mock Forex tools and streams a live NDJSON trace; the frontend renders it as a terminal-style timeline and silently falls back to a deterministic offline mock agent when the Lambda is unreachable or `NEXT_PUBLIC_AGENT_MODE=mock`. The new `infra/` SST workspace is fully decoupled from the Next.js build, and the GitHub Actions workflow now deploys the Lambda alongside the Fly.io app.
+
+### 2 audit errors resolved — cold-start fallback signal + dev CORS origin
+Fixed the cold-start fallback path, which reused an already-aborted `AbortController` and left the widget stuck in a streaming state with an empty trace — it now allocates a fresh controller for the mock fallback. Also added the `http://localhost:3000` dev origin to the Lambda's CORS allowlist for non-prod stages (D16).
 
 ## v0.7.0 — 2026-06-02
 
