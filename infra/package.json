@@ -1,0 +1,19 @@
+{
+  "name": "mario-agent-infra",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "deploy": "sst deploy --stage prod",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p packages/functions/tsconfig.json"
+  },
+  "devDependencies": {
+    "sst": "^4.15.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.8",
+    "@types/node": "^22",
+    "@types/aws-lambda": "^8.10.0"
+  }
+}

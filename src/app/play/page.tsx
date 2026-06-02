@@ -1,34 +1,21 @@
 import type { Metadata } from "next";
+import { AgentWidget } from "@/components/play/AgentWidget";
 
 export const metadata: Metadata = {
-  title: "Play — Agent Orchestrator",
-  description: "Coming soon: an interactive game about AI agent strengths and orchestration.",
+  title: "Ask the Agent — Serverless Forex Demo",
+  description:
+    "A live serverless AI agent: type a Forex instruction and watch a bounded Groq Llama tool-calling loop run on AWS Lambda, streaming its reasoning and tool calls.",
 };
 
 export default function PlayPage() {
   return (
-    <div className="mx-auto flex max-w-lg flex-col items-center justify-center px-4 py-24 text-center">
-      <div className="mb-6 text-5xl" role="img" aria-label="Coming soon">
-        🎮
-      </div>
-
-      <h1 className="mb-3 text-3xl font-bold text-brand-900 dark:text-brand-100">
-        Agent Orchestrator
-      </h1>
-
-      <p className="mb-2 text-base text-brand-600 dark:text-brand-400">
-        Coming soon.
+    <div className="mx-auto max-w-2xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold text-brand-900 dark:text-brand-100">Ask the Agent</h1>
+      <p className="mb-6 text-sm text-brand-600 dark:text-brand-400">
+        Type a Forex instruction. It runs a bounded tool-calling agent loop on AWS Lambda (Groq
+        Llama 3.3 70B) over mock Forex tools — no real trading. Watch the live trace below.
       </p>
-
-      <p className="max-w-sm text-sm text-brand-500 dark:text-brand-500">
-        A mini-game visualizing the strengths and quirks of the agents I work with — CodeRabbit,
-        Devin, Claude Code, and Cursor. Deliberately deferred to a future spec so the resume ships
-        complete and polished first.
-      </p>
-
-      <p className="mt-8 text-xs text-brand-400 italic dark:text-brand-600">
-        The best agents know when to scope-creep and when to stay in their lane.
-      </p>
+      <AgentWidget />
     </div>
   );
 }

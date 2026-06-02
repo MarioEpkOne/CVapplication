@@ -8,7 +8,7 @@ This is a **first-class deliverable** — rich context for Claude Code (and any 
 
 ## What this app is
 
-An interactive resume + cover letter built as a work sample for a Purple LAB job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — placeholder for a future Agent Orchestrator mini-game).
+An interactive resume + cover letter built as a work sample for a Purple LAB job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — "Ask the Agent", a live serverless Forex agent demo backed by AWS Lambda).
 
 The medium is the message: a deliberately over-engineered Next.js app on Fly.io, with tRPC, Drizzle/SQLite, Framer Motion, and agent-context artifacts as first-class deliverables — mirroring Purple's stack on purpose.
 
@@ -28,6 +28,20 @@ npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
 ```
 
 Deploy: push to `main` → GitHub Actions → `flyctl deploy --remote-only` (needs `FLY_API_TOKEN` secret).
+
+### Infra / Lambda ("Ask the Agent")
+
+The Play page is backed by an AWS Lambda deployed with SST, living in the `infra/` workspace (decoupled from the Next.js build).
+
+```bash
+cd infra && npm install                      # install infra workspace deps (groq-sdk, sst, vitest)
+cd infra && npm run typecheck                 # tsc over packages/functions (resolves @shared/*)
+cd infra && npm test                          # vitest run (tools + agent-loop unit tests)
+cd infra && npx sst deploy --stage prod       # deploy the Lambda Function URL (CI does this)
+cd infra && npx sst secret set GroqApiKey <value> --stage prod   # one-time: set the Groq API key
+```
+
+After first deploy, set the Function URL as the Fly secret `NEXT_PUBLIC_AGENT_URL` so the frontend talks to the live Lambda; otherwise it runs the offline mock agent.
 
 ### Quality Gate Hooks (Claude Code)
 
@@ -50,12 +64,23 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 ├── App routes (RSC + client components)
 │   ├── /              → Resume (default tab)
 │   ├── /cover-letter  → Cover Letter (scrollytelling)
-│   └── /play          → "Coming soon" placeholder
+│   └── /play          → "Ask the Agent" serverless Forex agent demo
 ├── tRPC router (at /api/trpc/[trpc])
 │   └── analytics.track (mutation) → pageview insert (fire-and-forget)
 ├── Drizzle ORM → SQLite at DATABASE_PATH (default: /data/app.db on Fly volume)
 └── Print CSS for PDF, OG image via next/og, dark-mode via next-themes
+
+infra/ (separate SST workspace, NOT part of the Next.js build)
+└── AWS Lambda (eu-central-1, Function URL, RESPONSE_STREAM) running a bounded
+    Groq Llama 3.3 70B tool-calling loop over mock Forex tools
 ```
+
+### Ask the Agent (Play page)
+
+- `src/app/play/page.tsx` renders `AgentWidget` (English-only, D7). The widget POSTs a prompt to the Lambda Function URL and renders the streamed **NDJSON** `AgentEvent` lines as a terminal-style trace timeline.
+- The Lambda (`infra/packages/functions/src/agent.ts`) runs a bounded agent loop (`MAX_ITERATIONS=4`, `MAX_OUTPUT_TOKENS=512`, `PROMPT_MAX_CHARS=500`, 30s timeout) calling Groq with four **mock** Forex tools (`get_price`, `risk_check`, `open_order`, `get_positions` — no real trading, no external APIs).
+- On any Lambda error/timeout, or when `NEXT_PUBLIC_AGENT_URL` is unset / `NEXT_PUBLIC_AGENT_MODE=mock`, the frontend silently falls back to a deterministic offline mock agent (`src/components/play/MockAgent.ts`) and shows a "mock mode" badge.
+- The Next.js build is **decoupled** from `infra/`: the root `tsconfig.json` excludes `infra`, and the only coupling is the `NEXT_PUBLIC_AGENT_URL` env var.
 
 ### Key files
 
@@ -118,6 +143,11 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 | `DATABASE_PATH` | `fly.toml [env]` | SQLite file path on Fly volume |
 | `NEXT_PUBLIC_SITE_URL` | `flyctl secrets set` | Canonical URL for OG metadata |
 | `FLY_API_TOKEN` | GitHub Actions secret | Deploy authorization |
+| `GROQ_API_KEY` | SST Secret (`sst secret set GroqApiKey`) | Groq API auth for the Lambda. Never `NEXT_PUBLIC`, never committed. |
+| `ALLOWED_ORIGINS` | SST Function env (in `sst.config.ts`) | CORS origin allowlist for the Lambda |
+| `NEXT_PUBLIC_AGENT_URL` | Fly secret / `.env.local` | Lambda Function URL for the frontend. Unset = offline mock mode. |
+| `NEXT_PUBLIC_AGENT_MODE` | `.env.local` (dev only) | Set to `mock` to force the offline mock agent |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | GitHub Actions secrets | SST deploy from CI |
 
 Reference `.env.example` for the full list. **Never commit real values.**
 
@@ -143,6 +173,9 @@ Both are on `$PATH` via `~/.bashrc`. AWS credentials live in `~/.aws/credentials
 - **`scripts/migrate.mjs` path resolution**: the `drizzle/` folder must be copied into the Docker image alongside `server.js`. The Dockerfile does this explicitly.
 - **OG image uses Node runtime** (not edge) — compatible with `output: "standalone"` on Fly.
 - **`PrintButton` is a separate client component** (`src/components/resume/PrintButton.tsx`) — cannot be an inline function with `"use client"` inside an RSC.
+- **`AgentEvent` type is duplicated** between `infra/packages/shared/src/events.ts` (canonical, used by the Lambda) and `src/lib/agent-events.ts` (frontend mirror) to keep the Next.js build decoupled from `infra/`. Keep them in sync; `tests/agent-stream.test.ts` guards the shapes.
+- **`infra/` is excluded** from the root `tsconfig.json`, from `eslint src/`, and from the root `npm test`. It has its own tsconfig/vitest/package.json. Run its checks with `cd infra && npm test && npm run typecheck`. `groq-sdk` lives ONLY in `infra/packages/functions/package.json`, never in the root.
+- **`awslambda` is a Lambda-runtime global**, not an npm import. The handler in `agent.ts` declares it and guards the `streamifyResponse` wrap with `typeof awslambda !== "undefined"` so the module is import-safe in unit tests.
 
 ---
 

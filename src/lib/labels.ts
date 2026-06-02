@@ -17,6 +17,7 @@ export const labels = {
     viewSource: "Zobrazit zdrojový kód",
     comingSoon: "Již brzy",
     getInTouch: "Napište mi",
+    askTheAgent: "Zeptej se agenta",
   },
   en: {
     experience: "Experience",
@@ -36,7 +37,8 @@ export const labels = {
     viewSource: "View source",
     comingSoon: "Coming soon.",
     getInTouch: "Get in Touch",
+    askTheAgent: "Ask the Agent",
   },
 } as const;
 
-export type Labels = typeof labels["cs"];
+export type Labels = (typeof labels)["cs"];
