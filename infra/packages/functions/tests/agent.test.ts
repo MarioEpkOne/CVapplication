@@ -108,6 +108,37 @@ describe("runAgent", () => {
     expect(errors).toHaveLength(1);
   });
 
+  it("retries once on Groq tool_use_failed, then succeeds", async () => {
+    const events: AgentEvent[] = [];
+    let n = 0;
+    const groq: GroqLike = {
+      chat: {
+        completions: {
+          create: vi.fn(async () => {
+            n++;
+            if (n === 1) {
+              // Shape of groq-sdk's APIError for a 400 tool_use_failed.
+              return Promise.reject({
+                status: 400,
+                error: { error: { code: "tool_use_failed" } },
+              });
+            }
+            return stopMessage("Recovered after retry.") as never;
+          }),
+        },
+      },
+    };
+    await runAgent({
+      prompt: "hi",
+      origin: ALLOWED[0],
+      groq,
+      write: (e) => events.push(e),
+      allowedOrigins: ALLOWED,
+    });
+    expect(n).toBe(2);
+    expect(events.at(-1)).toEqual({ type: "done", summary: "Recovered after retry." });
+  });
+
   it("rejects unauthorized origins", async () => {
     const events: AgentEvent[] = [];
     const create = vi.fn();

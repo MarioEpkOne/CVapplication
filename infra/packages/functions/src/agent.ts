@@ -38,6 +38,7 @@ export interface GroqLike {
         messages: unknown[];
         tools?: unknown;
         max_tokens?: number;
+        temperature?: number;
       }): Promise<GroqCompletion>;
     };
   };
@@ -85,6 +86,30 @@ export interface RunAgentOptions {
   allowedOrigins: string[];
 }
 
+// Groq's Llama 3.3 70B intermittently emits tool calls in a malformed text
+// syntax (`<function=name{...}>`) instead of structured tool_calls; Groq rejects
+// these server-side with a 400 `tool_use_failed`. `temperature: 0` makes correct,
+// structured tool calls overwhelmingly likely (measured 0/10 failures vs ~4/10 at
+// the default temperature), and a single retry covers the residual stochastic case.
+async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promise<GroqCompletion> {
+  const args = {
+    model: MODEL,
+    messages,
+    tools: FOREX_TOOLS,
+    max_tokens: MAX_OUTPUT_TOKENS,
+    temperature: 0,
+  };
+  try {
+    return await groq.chat.completions.create(args);
+  } catch (err) {
+    const code = (err as { error?: { error?: { code?: string } } })?.error?.error?.code;
+    if (code === "tool_use_failed") {
+      return await groq.chat.completions.create(args);
+    }
+    throw err;
+  }
+}
+
 // Core agent loop, factored out so it is testable without the Lambda runtime global.
 // Returns 403 sentinel (false) when the origin is disallowed; otherwise true.
 export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: boolean }> {
@@ -108,12 +133,7 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     let res: GroqCompletion;
     try {
-      res = await groq.chat.completions.create({
-        model: MODEL,
-        messages,
-        tools: FOREX_TOOLS,
-        max_tokens: MAX_OUTPUT_TOKENS,
-      });
+      res = await createCompletion(groq, messages);
     } catch (err) {
       const status = (err as { status?: number })?.status;
       if (status === 429) {

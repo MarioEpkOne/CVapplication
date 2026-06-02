@@ -24,6 +24,10 @@ export default $config({
       runtime: "nodejs20.x",
       timeout: "30 seconds",
       memory: "256 MB",
+      // Enable Lambda response streaming. SST derives the Function URL invokeMode
+      // from this (streaming ? RESPONSE_STREAM : BUFFERED) — there is no
+      // `url.invokeMode` property, so this top-level flag is the only switch.
+      streaming: true,
       link: [groqKey],
       environment: {
         GROQ_API_KEY: groqKey.value,
@@ -32,10 +36,12 @@ export default $config({
       url: {
         cors: {
           allowOrigins: origins,
-          allowMethods: ["POST", "OPTIONS"],
+          // OPTIONS is invalid here (Lambda Function URL allowMethods members must
+          // be <=6 chars) and unnecessary — the Function URL answers the CORS
+          // preflight automatically from this config. List only the real method.
+          allowMethods: ["POST"],
           allowHeaders: ["Content-Type"],
         },
-        invokeMode: "RESPONSE_STREAM",
       },
     });
 
