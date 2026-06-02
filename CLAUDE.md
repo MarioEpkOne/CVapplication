@@ -1,6 +1,8 @@
-# CLAUDE.md — Agent context for the interactive-resume-cover app
+# CLAUDE.md
 
-This file is a **first-class deliverable** — rich context for Claude Code (and any capable agent) to understand the codebase quickly, make correct changes, and avoid known pitfalls.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+This is a **first-class deliverable** — rich context for Claude Code (and any capable agent) to understand the codebase quickly, make correct changes, and avoid known pitfalls.
 
 ---
 
@@ -20,6 +22,7 @@ npm run build        # Production build → .next/standalone
 npm run lint         # ESLint (src/ only; no next lint — removed in Next 16)
 npm run typecheck    # tsc --noEmit
 npm run test         # vitest run
+npm run test:watch   # vitest in watch mode (single test: vitest run src/path/to/test.ts)
 npm run db:generate  # drizzle-kit generate → drizzle/ SQL migration
 npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
 ```
@@ -117,6 +120,15 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 | `FLY_API_TOKEN` | GitHub Actions secret | Deploy authorization |
 
 Reference `.env.example` for the full list. **Never commit real values.**
+
+## Dev-environment tooling (WSL2)
+
+| Tool | Version | Path | Purpose |
+|------|---------|------|---------|
+| AWS CLI | v1 | `~/.local/bin/aws` | IAM user `sst-deploy` configured, region `eu-central-1` |
+| SST | v4.15+ | `~/.sst/bin/sst` | IaC for Lambda / serverless infra (used by Play page backend) |
+
+Both are on `$PATH` via `~/.bashrc`. AWS credentials live in `~/.aws/credentials` (not in this repo).
 
 ---
 
