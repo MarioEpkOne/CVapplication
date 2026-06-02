@@ -23,7 +23,7 @@ export const resumeCs: ResumeData = {
   },
 
   summary:
-    "Specializuji se na orchestraci AI agentů a vývoj backendových systémů. Na AI agentní přístupy jsem přišel nezávisle — budováním uzavřených pipeline s Claude Code, kde agenti plánují, píší kód a předávají si kontext prostřednictvím strukturovaných artefaktů. Na backend přináším solidní základ v Java/Kotlin/Spring Boot ze čtyř let komerčního vývoje softwaru.",
+    "Specializuji se na orchestraci AI agentů a vývoj backendových systémů. Na AI agentní přístupy jsem přišel nezávisle budováním uzavřených pipeline s Claude Code, kde agenti plánují, píší kód a předávají si kontext prostřednictvím strukturovaných artefaktů. Na backend přináším solidní základ v Java/Kotlin/Spring Boot ze 3 let komerčního vývoje softwaru.",
 
   experience: [
     {
@@ -31,7 +31,6 @@ export const resumeCs: ResumeData = {
       role: "AI & Agentic Developer",
       period: "2025 — současnost",
       bullets: [
-        "Vyvinul metodiku context-writing: strukturované CLAUDE.md, AGENTS.md a Implementation Plans jako kontext první třídy pro AI agenty.",
         "Postavil uzavřené agent pipeline (plánování → implementace → review → commit) s Claude Code a MCP servery.",
         "Vytvořil 6 AI nástrojů — od prompt analytiky po emailový triage plugin — demonstrující end-to-end agentic workflow.",
       ],
@@ -163,7 +162,7 @@ export const resumeEn: ResumeData = {
   header: {
     name: "Mario Alina",
     title: "Backend Engineer & AI Agent Orchestrator",
-    photoSrc: "/photo-placeholder.svg",
+    photoSrc: "/ai-photo.jpg",
     location: "Brno, Czech Republic",
     contacts: [
       {
