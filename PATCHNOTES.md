@@ -1,5 +1,10 @@
-<!-- last-commit: f8662d113fd6a5abc2634905d4ca27f1b629d9f6 -->
+<!-- last-commit: d120feac2fc7d83dec95a8ed89ab13e8d4aa1256 -->
 # Patch Notes
+
+## v0.8.1 — 2026-06-02
+
+### make the agent Lambda actually deploy and stream
+Fixed three bugs found while deploying the "Ask the Agent" Lambda to AWS. The Function URL CORS config listed `OPTIONS`, which the Lambda API rejects (method names must be ≤6 chars) and which is unnecessary since preflight is automatic — narrowed to `POST`. Response streaming was never actually on because `url.invokeMode` is not a valid SST property; it's now enabled via the top-level `streaming: true`, so the live trace streams chunk-by-chunk instead of returning only the first event. And the Groq Llama 3.3 70B calls now use `temperature: 0` (with a one-shot retry on `tool_use_failed`) to stop the model from intermittently emitting malformed tool calls. The Lambda is verified live end-to-end across all four preset prompts.
 
 ## v0.8.0 — 2026-06-02
 
