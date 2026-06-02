@@ -1,5 +1,25 @@
-<!-- last-commit: d120feac2fc7d83dec95a8ed89ab13e8d4aa1256 -->
+<!-- last-commit: 1efaa28959b477d1684ce8ef9af5c548769be6ba -->
 # Patch Notes
+
+## v0.9.0 — 2026-06-03
+
+### read Lambda URL at runtime so the live frontend reaches it
+The Play page was stuck in mock mode in production because `NEXT_PUBLIC_AGENT_URL` was read in a client component and inlined at build time, where the Fly runtime secret doesn't exist. The page now reads a plain (non-public) `AGENT_URL` per request in a `force-dynamic` server component and passes it to the widget, so changing the Lambda URL needs only a restart, not a rebuild.
+
+### tweak CZ summary, drop a bullet, use real EN header photo
+Content-only edits to the resume data file: a reworded Czech summary, one fewer bullet, and the real English header photo.
+
+### gitignore SST-generated sst-env.d.ts files
+Added the SST-generated `sst-env.d.ts` type files to the infra workspace's `.gitignore` so they no longer show up as untracked noise.
+
+### clarify test layout in CLAUDE.md (tests/ not colocated; no RTL)
+Documentation only — clarified that root tests live in `tests/` rather than colocated with source, and that there is no jsdom/React Testing Library setup.
+
+### security-harden the agent Lambda + CSP, clear postcss advisory, quality cleanup
+Closed the security gaps found in the app audit. The public "Ask the Agent" Lambda now rejects a missing or mismatched `Origin` in production (a new `REQUIRE_ORIGIN` flag) and enforces a best-effort per-IP rate limit (10 req/min) before any Groq call, so the paid inference endpoint is no longer an open, unmetered gateway. A pragmatic enforcing Content-Security-Policy header was added to the Next.js app, the transitive `postcss` advisory was cleared via an `overrides` pin (plus a Next 16.2.7 bump), and the LLM-controlled tool name is no longer logged verbatim. Also bundled quality cleanup: a real `lang` attribute for English visitors, a fixed polymorphic `Reveal`, an extracted `TechChip` component, named constants in the mock Forex tools, and removal of two dead exports.
+
+### 1 audit error resolved — requireOrigin test coverage
+Added the four `isOriginAllowed` `requireOrigin` assertions the spec mandated, so the production "reject a missing Origin" behavior now has direct automated coverage (infra suite: 18 tests).
 
 ## v0.8.1 — 2026-06-02
 
