@@ -1,5 +1,10 @@
-<!-- last-commit: b852f574f5415d964ebe6e70cfad0dedcffbe6fc -->
+<!-- last-commit: a9594d7a105a5c653f146c59fa0d11f8fa9ebbd2 -->
 # Patch Notes
+
+## v0.7.0 — 2026-06-02
+
+### remove contact form; social links only, drop email + Resend
+Removed the server-backed contact form end to end — the UI component, the tRPC `contact.submit` mutation, its Zod validation, the Resend email service, and the `contact_messages` table (dropped via a forward migration) — eliminating the entire spam and email-deliverability surface rather than hardening it. The publicly exposed email address was removed from the resume header in both locales, and the bottom "Get in touch" section now shows GitHub + LinkedIn links only, sourced from the resume data file. The `resend` dependency was dropped; analytics, the shared rate limiter, and `sanitizeText` are unaffected.
 
 ## v0.6.0 — 2026-06-02
 
