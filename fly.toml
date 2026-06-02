@@ -1,9 +1,9 @@
 # fly.toml — Fly.io deployment config
-# App name: set to a real name before first deploy (e.g. mario-cv-purple)
+# App name: mario-portfolio → https://mario-portfolio.fly.dev
 # Region: fra (Frankfurt) — closest to Brno; alternative is waw (Warsaw).
 # See docs/adr/0001-fly-over-aws.md for the region rationale.
 
-app = "mario-cv-purple"
+app = "mario-portfolio"
 primary_region = "fra"
 
 [build]

@@ -1,0 +1,5 @@
+# Shell scripts MUST use LF line endings. A CRLF in the shebang makes Linux look
+# for an interpreter literally named "/bin/sh\r", which fails at container start
+# with `exec: ./scripts/start.sh: not found` (exit 127) → crash loop.
+# This repo is often checked out on Windows/WSL, so enforce LF explicitly.
+*.sh text eol=lf
