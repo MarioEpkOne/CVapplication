@@ -44,6 +44,9 @@ export function AgentWidget() {
 
       const controller = new AbortController();
       abortRef.current = controller;
+      // The fallback path allocates its own controller; track it so the outer
+      // finally can clear whichever controller is currently the active one.
+      let fallbackController: AbortController | null = null;
       setEvents([]);
       setStatus("streaming");
 
@@ -81,10 +84,15 @@ export function AgentWidget() {
             return;
           }
           // Network error, non-2xx, DNS, 403, or cold-start timeout → silent mock fallback.
+          // Do not reuse the (possibly aborted) cold-start controller's signal: a cold-start
+          // timeout aborts it, which would make runMockAgent return zero events. Use a fresh
+          // controller and re-store it so unmount/new-run can still cancel the fallback.
+          fallbackController = new AbortController();
+          abortRef.current = fallbackController;
           setMockMode(true);
           setEvents([]);
           setStatus("streaming");
-          await consume(runMockAgent({ prompt: p, signal: controller.signal }));
+          await consume(runMockAgent({ prompt: p, signal: fallbackController.signal }));
         } finally {
           clearTimeout(coldStart);
         }
@@ -93,7 +101,9 @@ export function AgentWidget() {
           setStatus("error");
         }
       } finally {
-        if (abortRef.current === controller) abortRef.current = null;
+        if (abortRef.current === controller || abortRef.current === fallbackController) {
+          abortRef.current = null;
+        }
       }
     },
     [consume],

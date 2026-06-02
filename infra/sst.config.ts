@@ -12,6 +12,13 @@ export default $config({
   async run() {
     const groqKey = new sst.Secret("GroqApiKey");
 
+    // D16: production allows only the Fly domain; dev/staging also allows the
+    // local dev origin so a browser pointed at a real Lambda URL is not CORS-blocked.
+    const origins =
+      $app.stage === "prod"
+        ? ["https://mario-portfolio.fly.dev"]
+        : ["https://mario-portfolio.fly.dev", "http://localhost:3000"];
+
     const agent = new sst.aws.Function("AgentHandler", {
       handler: "packages/functions/src/agent.handler",
       runtime: "nodejs20.x",
@@ -20,11 +27,11 @@ export default $config({
       link: [groqKey],
       environment: {
         GROQ_API_KEY: groqKey.value,
-        ALLOWED_ORIGINS: "https://mario-portfolio.fly.dev",
+        ALLOWED_ORIGINS: origins.join(","),
       },
       url: {
         cors: {
-          allowOrigins: ["https://mario-portfolio.fly.dev"],
+          allowOrigins: origins,
           allowMethods: ["POST", "OPTIONS"],
           allowHeaders: ["Content-Type"],
         },
