@@ -1,5 +1,16 @@
-<!-- last-commit: 345aae3befa5326cabcf76ac8e9244b601472b9f -->
+<!-- last-commit: 5b90b643ab8c17b0119418ff35cab9d072723e1c -->
 # Patch Notes
+
+## v0.6.0 — 2026-06-02
+
+### add Claude Code quality gate hooks for auto-format and pre-stop checks
+Added automated quality gates via Claude Code hooks. A PostToolUse hook (`format-file.sh`) auto-formats TS/TSX files with ESLint `--fix` and Prettier after every Write/Edit/MultiEdit. A Stop hook (`verify.sh`) blocks task completion until typecheck, lint, and circular-dependency checks all pass. Installed prettier and madge as devDependencies, added a `deps:check` script for circular import detection, and wired everything in project-level `.claude/settings.json`.
+
+### add fixer log for quality-gate-hooks audit
+Added the fixer log from the quality-gate-hooks pipeline audit to version control for traceability.
+
+### 2 audit errors resolved — lockfile sync and hook executable bits
+Synced `package-lock.json` to include prettier and madge entries (fixing `npm ci` on fresh clones) and set hook scripts to mode 100755 in the git index via `git update-index --chmod=+x` (fixing execution on Linux/macOS where WSL's `core.fileMode=false` had silently dropped the executable bit).
 
 ## v0.5.0 — 2026-06-01
 
