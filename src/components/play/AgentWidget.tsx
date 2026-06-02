@@ -12,7 +12,7 @@ type Status = "idle" | "streaming" | "done" | "error";
 
 const COLD_START_TIMEOUT_MS = 10_000;
 
-export function AgentWidget() {
+export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
   const [prompt, setPrompt] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [events, setEvents] = useState<AgentEvent[]>([]);
@@ -50,8 +50,11 @@ export function AgentWidget() {
       setEvents([]);
       setStatus("streaming");
 
+      // NEXT_PUBLIC_AGENT_MODE is a dev-only build-time toggle (.env.local).
+      // The Lambda URL arrives as a prop so it can be read from the server at
+      // runtime (see play/page.tsx) rather than inlined into the client bundle.
       const mode = process.env.NEXT_PUBLIC_AGENT_MODE;
-      const url = process.env.NEXT_PUBLIC_AGENT_URL;
+      const url = agentUrl;
 
       try {
         if (mode === "mock" || !url) {
@@ -106,7 +109,7 @@ export function AgentWidget() {
         }
       }
     },
-    [consume],
+    [consume, agentUrl],
   );
 
   const streaming = status === "streaming";

@@ -41,7 +41,7 @@ cd infra && npx sst deploy --stage prod       # deploy the Lambda Function URL (
 cd infra && npx sst secret set GroqApiKey <value> --stage prod   # one-time: set the Groq API key
 ```
 
-After first deploy, set the Function URL as the Fly secret `NEXT_PUBLIC_AGENT_URL` so the frontend talks to the live Lambda; otherwise it runs the offline mock agent.
+After first deploy, set the Function URL as the Fly secret `AGENT_URL` so the frontend talks to the live Lambda; otherwise it runs the offline mock agent. (`AGENT_URL` is read at runtime by `play/page.tsx` — a plain, non-`NEXT_PUBLIC_` var — so changing it needs only a restart, not a rebuild.)
 
 ### Quality Gate Hooks (Claude Code)
 
@@ -79,8 +79,8 @@ infra/ (separate SST workspace, NOT part of the Next.js build)
 
 - `src/app/play/page.tsx` renders `AgentWidget` (English-only, D7). The widget POSTs a prompt to the Lambda Function URL and renders the streamed **NDJSON** `AgentEvent` lines as a terminal-style trace timeline.
 - The Lambda (`infra/packages/functions/src/agent.ts`) runs a bounded agent loop (`MAX_ITERATIONS=4`, `MAX_OUTPUT_TOKENS=512`, `PROMPT_MAX_CHARS=500`, 30s timeout) calling Groq with four **mock** Forex tools (`get_price`, `risk_check`, `open_order`, `get_positions` — no real trading, no external APIs).
-- On any Lambda error/timeout, or when `NEXT_PUBLIC_AGENT_URL` is unset / `NEXT_PUBLIC_AGENT_MODE=mock`, the frontend silently falls back to a deterministic offline mock agent (`src/components/play/MockAgent.ts`) and shows a "mock mode" badge.
-- The Next.js build is **decoupled** from `infra/`: the root `tsconfig.json` excludes `infra`, and the only coupling is the `NEXT_PUBLIC_AGENT_URL` env var.
+- On any Lambda error/timeout, or when `AGENT_URL` is unset / `NEXT_PUBLIC_AGENT_MODE=mock`, the frontend silently falls back to a deterministic offline mock agent (`src/components/play/MockAgent.ts`) and shows a "mock mode" badge. `AGENT_URL` is read at runtime in `play/page.tsx` (server component, `export const dynamic = "force-dynamic"`) and passed to `AgentWidget` as the `agentUrl` prop — deliberately **not** a `NEXT_PUBLIC_*` var, which would be build-time inlined.
+- The Next.js build is **decoupled** from `infra/`: the root `tsconfig.json` excludes `infra`, and the only coupling is the `AGENT_URL` runtime env var.
 
 ### Key files
 
@@ -145,7 +145,7 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 | `FLY_API_TOKEN` | GitHub Actions secret | Deploy authorization |
 | `GROQ_API_KEY` | SST Secret (`sst secret set GroqApiKey`) | Groq API auth for the Lambda. Never `NEXT_PUBLIC`, never committed. |
 | `ALLOWED_ORIGINS` | SST Function env (in `sst.config.ts`) | CORS origin allowlist for the Lambda |
-| `NEXT_PUBLIC_AGENT_URL` | Fly secret / `.env.local` | Lambda Function URL for the frontend. Unset = offline mock mode. |
+| `AGENT_URL` | Fly secret / `.env.local` | Lambda Function URL for the frontend, read at **runtime** by `play/page.tsx` (not `NEXT_PUBLIC_*` — that would be build-time inlined). Unset = offline mock mode. |
 | `NEXT_PUBLIC_AGENT_MODE` | `.env.local` (dev only) | Set to `mock` to force the offline mock agent |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | GitHub Actions secrets | SST deploy from CI |
 
