@@ -158,6 +158,13 @@ describe("runAgent", () => {
     expect(isOriginAllowed(ALLOWED[0], ALLOWED)).toBe(true);
   });
 
+  it("requireOrigin gates a missing Origin", () => {
+    expect(isOriginAllowed(undefined, ALLOWED, true)).toBe(false);   // E1 prod
+    expect(isOriginAllowed(undefined, ALLOWED, false)).toBe(true);   // E2 dev
+    expect(isOriginAllowed(undefined, ALLOWED)).toBe(true);          // E4 default
+    expect(isOriginAllowed("https://evil.example", ALLOWED, true)).toBe(false);
+  });
+
   it("rejects oversized prompts", async () => {
     const events: AgentEvent[] = [];
     const create = vi.fn();
