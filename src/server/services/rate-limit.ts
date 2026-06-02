@@ -3,7 +3,7 @@ export interface RateLimitConfig {
   max: number;
 }
 
-export const DEFAULT_RATE_LIMIT: RateLimitConfig = { windowMs: 10 * 60_000, max: 5 };
+const DEFAULT_RATE_LIMIT: RateLimitConfig = { windowMs: 10 * 60_000, max: 5 };
 
 export interface RateLimitResult {
   allowed: boolean;

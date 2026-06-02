@@ -31,6 +31,14 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
+  // Keep <html lang> honest: the SSR default is "cs" (layout.tsx); once the
+  // client-side locale is known/changed, reflect it on the document element.
+  // Client-only effect → no SSR/hydration impact (E18; <html> already has
+  // suppressHydrationWarning).
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const setLocale = (l: Locale) => {
     setLocaleState(l);
     try {

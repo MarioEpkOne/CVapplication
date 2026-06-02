@@ -2,6 +2,7 @@ import Groq from "groq-sdk";
 import { FOREX_TOOLS } from "@shared/tool-defs";
 import type { AgentEvent } from "@shared/events";
 import { executeTool } from "./tools";
+import { checkRateLimit } from "./rate-limit";
 
 const MAX_ITERATIONS = 4;
 const MAX_OUTPUT_TOKENS = 512;
@@ -27,6 +28,7 @@ interface LambdaUrlEvent {
   headers?: Record<string, string | undefined>;
   body?: string;
   isBase64Encoded?: boolean;
+  requestContext?: { http?: { sourceIp?: string } };
 }
 
 // Minimal structural interface so the loop is testable without the real SDK.
@@ -59,10 +61,14 @@ interface GroqCompletion {
   choices: Array<{ message: GroqMessage; finish_reason?: string }>;
 }
 
-export function isOriginAllowed(origin: string | undefined, allowed: string[]): boolean {
-  // No origin header (e.g. server-to-server, curl) is allowed; only a *present,
-  // non-matching* origin is rejected.
-  if (!origin) return true;
+export function isOriginAllowed(
+  origin: string | undefined,
+  allowed: string[],
+  requireOrigin = false,
+): boolean {
+  // An absent origin (server-to-server, curl) is allowed only when not required.
+  // A *present, non-matching* origin is always rejected.
+  if (!origin) return !requireOrigin;
   return allowed.some((a) => a.toLowerCase() === origin.toLowerCase());
 }
 
@@ -84,6 +90,7 @@ export interface RunAgentOptions {
   groq: GroqLike;
   write: (e: AgentEvent) => void;
   allowedOrigins: string[];
+  requireOrigin?: boolean;
 }
 
 // Groq's Llama 3.3 70B intermittently emits tool calls in a malformed text
@@ -113,9 +120,9 @@ async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promis
 // Core agent loop, factored out so it is testable without the Lambda runtime global.
 // Returns 403 sentinel (false) when the origin is disallowed; otherwise true.
 export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: boolean }> {
-  const { prompt, origin, groq, write, allowedOrigins } = opts;
+  const { prompt, origin, groq, write, allowedOrigins, requireOrigin = false } = opts;
 
-  if (!isOriginAllowed(origin, allowedOrigins)) {
+  if (!isOriginAllowed(origin, allowedOrigins, requireOrigin)) {
     return { forbidden: true };
   }
 
@@ -170,7 +177,7 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
         }
 
         if (!KNOWN_TOOLS.has(name)) {
-          console.warn(`Unknown tool requested: ${name}`);
+          console.warn("Unknown tool requested (name omitted from log)");
           write({ type: "reasoning", delta: "I tried to use an unavailable tool." });
           messages.push({
             role: "tool",
@@ -234,13 +241,24 @@ async function streamHandler(
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
+  const requireOrigin = process.env.REQUIRE_ORIGIN === "true";
   const origin =
     event.headers?.origin ??
     event.headers?.Origin ??
     (event.headers as Record<string, string>)?.ORIGIN;
 
-  if (!isOriginAllowed(origin, allowedOrigins)) {
+  // Gate 1: origin. In prod (REQUIRE_ORIGIN=true) a missing origin is rejected.
+  if (!isOriginAllowed(origin, allowedOrigins, requireOrigin)) {
     // 403 with no body; Function URL CORS handles preflight separately.
+    responseStream.end();
+    return;
+  }
+
+  // Gate 2: per-IP rate limit (best-effort, in-memory). Runs after the origin
+  // gate and before any Groq construction/call so abuse never reaches the model.
+  const ip = event.requestContext?.http?.sourceIp ?? "unknown";
+  if (!checkRateLimit(ip)) {
+    send(responseStream, { type: "error", message: "Rate limit exceeded — please wait a moment." });
     responseStream.end();
     return;
   }
@@ -255,6 +273,7 @@ async function streamHandler(
       groq,
       write: (e) => send(responseStream, e),
       allowedOrigins,
+      requireOrigin,
     });
   } catch {
     send(responseStream, { type: "error", message: "Agent failed" });

@@ -1,6 +1,7 @@
 "use client";
 
 import { Reveal } from "@/components/Reveal";
+import { TechChip } from "@/components/resume/TechChip";
 import type { ExperienceEntry } from "@/data/resume.types";
 
 interface ExperienceTimelineProps {
@@ -53,12 +54,7 @@ export function ExperienceTimeline({ experience, heading }: ExperienceTimelinePr
                 {entry.tech && entry.tech.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
                     {entry.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-800 dark:text-brand-300"
-                      >
-                        {t}
-                      </span>
+                      <TechChip key={t} label={t} />
                     ))}
                   </div>
                 )}
@@ -77,12 +73,7 @@ export function ExperienceTimeline({ experience, heading }: ExperienceTimelinePr
                         {project.tech.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {project.tech.map((t) => (
-                              <span
-                                key={t}
-                                className="rounded-full bg-brand-100 px-2 py-0.5 text-xs font-medium text-brand-700 dark:bg-brand-800 dark:text-brand-300"
-                              >
-                                {t}
-                              </span>
+                              <TechChip key={t} label={t} />
                             ))}
                           </div>
                         )}

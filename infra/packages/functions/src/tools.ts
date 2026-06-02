@@ -40,6 +40,18 @@ function randomHex(bytes: number): string {
   return out;
 }
 
+// Named constants for the mock RNG (readability only — values unchanged, D12/E17).
+const PRICE_JITTER = 0.0005; // ±0.05% bid jitter (get_price, open_order)
+const RISK_REJECTION_RATE = 0.2; // P(risk_check rejects)
+const REJECTED_RISK_MIN = 0.7; // rejected riskScore floor
+const REJECTED_RISK_SPAN = 0.3; // rejected riskScore span (0.7..1.0)
+const APPROVED_RISK_SPAN = 0.5; // approved riskScore span (0..0.5)
+const MAX_OPEN_POSITIONS = 3; // get_positions returns 1..3
+const DEFAULT_LOT = 0.1; // open_order default lots
+const LOT_MIN = 0.1; // get_positions lot floor
+const LOT_SPAN = 0.9; // get_positions lot span (0.1..1.0)
+const POSITION_PRICE_JITTER = 0.002; // ±0.2% entry/current jitter (get_positions)
+
 // get_price({ pair }) ->
 //   ok:    { pair, bid, ask, spread, timestamp }
 //   error: { error: "Unknown pair: <pair>" }
@@ -51,7 +63,7 @@ export function getPrice(input: { pair?: unknown }): Record<string, unknown> {
   const base = BASE_PRICES[pair];
   const decimals = decimalsFor(pair);
   // Jitter in ±0.05%.
-  const jitter = (Math.random() - 0.5) * 2 * 0.0005;
+  const jitter = (Math.random() - 0.5) * 2 * PRICE_JITTER;
   const bid = round(base * (1 + jitter), decimals);
   const spread = SPREADS[pair];
   const ask = round(bid + spread, decimals);
@@ -75,18 +87,18 @@ export function riskCheck(input: {
   if (!isSupported(pair)) {
     return { error: `Unknown pair: ${String(pair)}` };
   }
-  const rejected = Math.random() < 0.2;
+  const rejected = Math.random() < RISK_REJECTION_RATE;
   if (rejected) {
     return {
       approved: false,
       reason: "Risk too high: position size exceeds prudent exposure for current volatility.",
-      riskScore: round(0.7 + Math.random() * 0.3, 2),
+      riskScore: round(REJECTED_RISK_MIN + Math.random() * REJECTED_RISK_SPAN, 2),
     };
   }
   return {
     approved: true,
     reason: "Risk within acceptable bounds.",
-    riskScore: round(Math.random() * 0.5, 2),
+    riskScore: round(Math.random() * APPROVED_RISK_SPAN, 2),
   };
 }
 
@@ -103,14 +115,14 @@ export function openOrder(input: {
   }
   const decimals = decimalsFor(pair);
   const base = BASE_PRICES[pair];
-  const jitter = (Math.random() - 0.5) * 2 * 0.0005;
+  const jitter = (Math.random() - 0.5) * 2 * PRICE_JITTER;
   const entryPrice = round(base * (1 + jitter), decimals);
   return {
     orderId: "ord_" + randomHex(4),
     status: "filled",
     pair,
     direction: typeof input.direction === "string" ? input.direction : "long",
-    lots: typeof input.lots === "number" ? input.lots : 0.1,
+    lots: typeof input.lots === "number" ? input.lots : DEFAULT_LOT,
     entryPrice,
     timestamp: new Date().toISOString(),
   };
@@ -119,16 +131,16 @@ export function openOrder(input: {
 // get_positions({}) ->
 //   { positions: Array<{ pair, direction, lots, entryPrice, currentPrice, pnl }> }
 export function getPositions(): Record<string, unknown> {
-  const count = 1 + Math.floor(Math.random() * 3); // 1..3
+  const count = 1 + Math.floor(Math.random() * MAX_OPEN_POSITIONS); // 1..3
   const directions = ["long", "short"] as const;
   const positions = Array.from({ length: count }, () => {
     const pair = SUPPORTED_PAIRS[Math.floor(Math.random() * SUPPORTED_PAIRS.length)];
     const decimals = decimalsFor(pair);
     const base = BASE_PRICES[pair];
     const direction = directions[Math.floor(Math.random() * directions.length)];
-    const lots = round(0.1 + Math.random() * 0.9, 2);
-    const entryPrice = round(base * (1 + (Math.random() - 0.5) * 2 * 0.002), decimals);
-    const currentPrice = round(base * (1 + (Math.random() - 0.5) * 2 * 0.002), decimals);
+    const lots = round(LOT_MIN + Math.random() * LOT_SPAN, 2);
+    const entryPrice = round(base * (1 + (Math.random() - 0.5) * 2 * POSITION_PRICE_JITTER), decimals);
+    const currentPrice = round(base * (1 + (Math.random() - 0.5) * 2 * POSITION_PRICE_JITTER), decimals);
     const sign = direction === "long" ? 1 : -1;
     const pnl = round(sign * (currentPrice - entryPrice) * lots * 100000, 2);
     return { pair, direction, lots, entryPrice, currentPrice, pnl };

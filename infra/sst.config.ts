@@ -32,6 +32,9 @@ export default $config({
       environment: {
         GROQ_API_KEY: groqKey.value,
         ALLOWED_ORIGINS: origins.join(","),
+        // Prod requires a matching browser Origin (rejects curl/no-origin abuse);
+        // dev/staging stays permissive so local curl and tests still work (D2/E2).
+        REQUIRE_ORIGIN: $app.stage === "prod" ? "true" : "false",
       },
       url: {
         cors: {
