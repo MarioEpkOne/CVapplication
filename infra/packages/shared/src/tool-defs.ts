@@ -56,8 +56,32 @@ export const FOREX_TOOLS = [
     type: "function" as const,
     function: {
       name: "get_positions",
-      description: "Get all current open positions with unrealized P&L.",
+      description:
+        "Get all current open positions (persisted for this user), each with its orderId and unrealized P&L. Returns an empty list if there are none.",
       parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "close_all_positions",
+      description: "Close every open position for this user. Returns the number closed.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "close_position",
+      description:
+        "Close a single open position by its orderId (from get_positions). Errors if no such position exists.",
+      parameters: {
+        type: "object",
+        properties: {
+          orderId: { type: "string", description: "The orderId of the position to close." },
+        },
+        required: ["orderId"],
+      },
     },
   },
 ] as const;

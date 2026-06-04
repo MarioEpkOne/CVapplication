@@ -19,6 +19,14 @@ export default $config({
         ? ["https://mario-portfolio.fly.dev"]
         : ["https://mario-portfolio.fly.dev", "http://localhost:3000"];
 
+    // Session store for persisted Forex positions + conversation history (D1).
+    // DynamoDB auto-deletes items after the `expiresAt` epoch-seconds TTL.
+    const sessions = new sst.aws.Dynamo("AgentSessions", {
+      fields: { sessionId: "string" },
+      primaryIndex: { hashKey: "sessionId" },
+      ttl: "expiresAt",
+    });
+
     const agent = new sst.aws.Function("AgentHandler", {
       handler: "packages/functions/src/agent.handler",
       runtime: "nodejs20.x",
@@ -28,13 +36,14 @@ export default $config({
       // from this (streaming ? RESPONSE_STREAM : BUFFERED) — there is no
       // `url.invokeMode` property, so this top-level flag is the only switch.
       streaming: true,
-      link: [groqKey],
+      link: [groqKey, sessions],
       environment: {
         GROQ_API_KEY: groqKey.value,
         ALLOWED_ORIGINS: origins.join(","),
         // Prod requires a matching browser Origin (rejects curl/no-origin abuse);
         // dev/staging stays permissive so local curl and tests still work (D2/E2).
         REQUIRE_ORIGIN: $app.stage === "prod" ? "true" : "false",
+        SESSIONS_TABLE: sessions.name,
       },
       url: {
         cors: {

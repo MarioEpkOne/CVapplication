@@ -3,6 +3,7 @@ import type { AgentEvent } from "@/lib/agent-events";
 export interface StreamAgentOptions {
   url: string;
   prompt: string;
+  sessionId?: string;
   signal?: AbortSignal;
 }
 
@@ -33,7 +34,7 @@ export async function* streamAgent(opts: StreamAgentOptions): AsyncGenerator<Age
   const res = await fetch(opts.url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: opts.prompt }),
+    body: JSON.stringify({ prompt: opts.prompt, sessionId: opts.sessionId }),
     signal: opts.signal,
   });
 

@@ -1,5 +1,6 @@
 // MOCK DATA ONLY — no real trading, no external APIs (spec Constraint 1).
 import { SUPPORTED_PAIRS, type ForexPair } from "@shared/tool-defs";
+import type { SessionState, Position } from "./session-store";
 
 const BASE_PRICES: Record<ForexPair, number> = {
   "EUR/USD": 1.085,
@@ -46,10 +47,7 @@ const RISK_REJECTION_RATE = 0.2; // P(risk_check rejects)
 const REJECTED_RISK_MIN = 0.7; // rejected riskScore floor
 const REJECTED_RISK_SPAN = 0.3; // rejected riskScore span (0.7..1.0)
 const APPROVED_RISK_SPAN = 0.5; // approved riskScore span (0..0.5)
-const MAX_OPEN_POSITIONS = 3; // get_positions returns 1..3
 const DEFAULT_LOT = 0.1; // open_order default lots
-const LOT_MIN = 0.1; // get_positions lot floor
-const LOT_SPAN = 0.9; // get_positions lot span (0.1..1.0)
 const POSITION_PRICE_JITTER = 0.002; // ±0.2% entry/current jitter (get_positions)
 
 // get_price({ pair }) ->
@@ -102,13 +100,12 @@ export function riskCheck(input: {
   };
 }
 
-// open_order({ pair, direction, lots }) ->
+// open_order({ pair, direction, lots }, state) ->
 //   { orderId, status: "filled", pair, direction, lots, entryPrice, timestamp } | { error }
-export function openOrder(input: {
-  pair?: unknown;
-  direction?: unknown;
-  lots?: unknown;
-}): Record<string, unknown> {
+export function openOrder(
+  input: { pair?: unknown; direction?: unknown; lots?: unknown },
+  state: SessionState,
+): Record<string, unknown> {
   const pair = input.pair;
   if (!isSupported(pair)) {
     return { error: `Unknown pair: ${String(pair)}` };
@@ -117,48 +114,94 @@ export function openOrder(input: {
   const base = BASE_PRICES[pair];
   const jitter = (Math.random() - 0.5) * 2 * PRICE_JITTER;
   const entryPrice = round(base * (1 + jitter), decimals);
-  return {
+  const direction: "long" | "short" = input.direction === "short" ? "short" : "long";
+  const lots = typeof input.lots === "number" ? input.lots : DEFAULT_LOT;
+  const openedAt = new Date().toISOString();
+  const position: Position = {
     orderId: "ord_" + randomHex(4),
+    pair,
+    direction,
+    lots,
+    entryPrice,
+    openedAt,
+  };
+  state.positions.push(position);
+  return {
+    orderId: position.orderId,
     status: "filled",
     pair,
-    direction: typeof input.direction === "string" ? input.direction : "long",
-    lots: typeof input.lots === "number" ? input.lots : DEFAULT_LOT,
+    direction,
+    lots,
     entryPrice,
-    timestamp: new Date().toISOString(),
+    timestamp: openedAt,
   };
 }
 
-// get_positions({}) ->
-//   { positions: Array<{ pair, direction, lots, entryPrice, currentPrice, pnl }> }
-export function getPositions(): Record<string, unknown> {
-  const count = 1 + Math.floor(Math.random() * MAX_OPEN_POSITIONS); // 1..3
-  const directions = ["long", "short"] as const;
-  const positions = Array.from({ length: count }, () => {
-    const pair = SUPPORTED_PAIRS[Math.floor(Math.random() * SUPPORTED_PAIRS.length)];
-    const decimals = decimalsFor(pair);
-    const base = BASE_PRICES[pair];
-    const direction = directions[Math.floor(Math.random() * directions.length)];
-    const lots = round(LOT_MIN + Math.random() * LOT_SPAN, 2);
-    const entryPrice = round(base * (1 + (Math.random() - 0.5) * 2 * POSITION_PRICE_JITTER), decimals);
-    const currentPrice = round(base * (1 + (Math.random() - 0.5) * 2 * POSITION_PRICE_JITTER), decimals);
-    const sign = direction === "long" ? 1 : -1;
-    const pnl = round(sign * (currentPrice - entryPrice) * lots * 100000, 2);
-    return { pair, direction, lots, entryPrice, currentPrice, pnl };
+// get_positions({}, state) -> { positions: Array<{ orderId, pair, direction, lots, entryPrice, currentPrice, pnl }> }
+export function getPositions(state: SessionState): Record<string, unknown> {
+  const positions = state.positions.map((p) => {
+    const decimals = decimalsFor(p.pair);
+    const base = BASE_PRICES[p.pair];
+    const currentPrice = round(
+      base * (1 + (Math.random() - 0.5) * 2 * POSITION_PRICE_JITTER),
+      decimals,
+    );
+    const sign = p.direction === "long" ? 1 : -1;
+    const pnl = round(sign * (currentPrice - p.entryPrice) * p.lots * 100000, 2);
+    return {
+      orderId: p.orderId,
+      pair: p.pair,
+      direction: p.direction,
+      lots: p.lots,
+      entryPrice: p.entryPrice,
+      currentPrice,
+      pnl,
+    };
   });
   return { positions };
 }
 
+// close_all_positions({}, state) -> { closed: <count> }
+export function closeAllPositions(state: SessionState): Record<string, unknown> {
+  const closed = state.positions.length;
+  state.positions = [];
+  return { closed };
+}
+
+// close_position({ orderId }, state) ->
+//   { closed: 1, orderId } | { error: "No open position with id <orderId>" }
+export function closePosition(
+  input: { orderId?: unknown },
+  state: SessionState,
+): Record<string, unknown> {
+  const orderId = typeof input.orderId === "string" ? input.orderId : "";
+  const idx = state.positions.findIndex((p) => p.orderId === orderId);
+  if (idx === -1) {
+    return { error: `No open position with id ${orderId}` };
+  }
+  state.positions.splice(idx, 1);
+  return { closed: 1, orderId };
+}
+
 // Dispatcher. Unknown tool name -> { error: "Unknown tool: <name>" }.
-export function executeTool(name: string, input: Record<string, unknown>): Record<string, unknown> {
+export function executeTool(
+  name: string,
+  input: Record<string, unknown>,
+  state: SessionState,
+): Record<string, unknown> {
   switch (name) {
     case "get_price":
       return getPrice(input);
     case "risk_check":
       return riskCheck(input);
     case "open_order":
-      return openOrder(input);
+      return openOrder(input, state);
     case "get_positions":
-      return getPositions();
+      return getPositions(state);
+    case "close_all_positions":
+      return closeAllPositions(state);
+    case "close_position":
+      return closePosition(input, state);
     default:
       return { error: `Unknown tool: ${name}` };
   }

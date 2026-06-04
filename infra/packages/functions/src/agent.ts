@@ -3,15 +3,32 @@ import { FOREX_TOOLS } from "@shared/tool-defs";
 import type { AgentEvent } from "@shared/events";
 import { executeTool } from "./tools";
 import { checkRateLimit } from "./rate-limit";
+import {
+  type SessionStore,
+  type SessionState,
+  seedSessionState,
+  getSessionStore,
+} from "./session-store";
 
 const MAX_ITERATIONS = 4;
 const MAX_OUTPUT_TOKENS = 512;
 const PROMPT_MAX_CHARS = 500;
 const MODEL = "llama-3.3-70b-versatile";
 
-const SYSTEM_PROMPT = `You are a Forex trading agent. You have access to tools for checking prices, assessing risk, opening orders, and viewing positions. Use the tools to fulfill the user's request. Always check the price before trading. Always run a risk check before opening an order. If risk is rejected, explain why and suggest an alternative. Be concise.`;
+const SYSTEM_PROMPT = `You are a Forex trading agent with tools to check prices, assess risk, open orders, view positions, and close positions. Positions persist for the user across messages.
 
-const KNOWN_TOOLS = new Set(["get_price", "risk_check", "open_order", "get_positions"]);
+Distinguish informational questions from instructions. If the user asks how something works or how to do it (e.g. "how do I open a position?"), explain the steps in plain text and OFFER to do it ("Shall I open a 0.1-lot EUR/USD long for you?") — but do NOT call any trading tool yet. Only call open_order / close_position / close_all_positions when the user gives a direct instruction or confirms a pending offer ("yes", "do it").
+
+Before opening: always get_price, then risk_check; if risk is rejected, explain why and suggest an alternative. To close, use close_position (by orderId) or close_all_positions. Be concise.`;
+
+const KNOWN_TOOLS = new Set([
+  "get_price",
+  "risk_check",
+  "open_order",
+  "get_positions",
+  "close_all_positions",
+  "close_position",
+]);
 
 // awslambda is provided by the Lambda Node runtime at execution time.
 declare const awslambda: {
@@ -84,6 +101,11 @@ export function validatePrompt(
   return { ok: true, prompt };
 }
 
+const SESSION_ID_RE = /^[A-Za-z0-9-]{1,64}$/;
+export function isValidSessionId(sessionId: unknown): sessionId is string {
+  return typeof sessionId === "string" && SESSION_ID_RE.test(sessionId);
+}
+
 export interface RunAgentOptions {
   prompt: string;
   origin?: string;
@@ -91,6 +113,8 @@ export interface RunAgentOptions {
   write: (e: AgentEvent) => void;
   allowedOrigins: string[];
   requireOrigin?: boolean;
+  sessionId?: string;
+  store: SessionStore;
 }
 
 // Groq's Llama 3.3 70B intermittently emits tool calls in a malformed text
@@ -120,7 +144,16 @@ async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promis
 // Core agent loop, factored out so it is testable without the Lambda runtime global.
 // Returns 403 sentinel (false) when the origin is disallowed; otherwise true.
 export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: boolean }> {
-  const { prompt, origin, groq, write, allowedOrigins, requireOrigin = false } = opts;
+  const {
+    prompt,
+    origin,
+    groq,
+    write,
+    allowedOrigins,
+    requireOrigin = false,
+    sessionId,
+    store,
+  } = opts;
 
   if (!isOriginAllowed(origin, allowedOrigins, requireOrigin)) {
     return { forbidden: true };
@@ -132,10 +165,37 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
     return { forbidden: false };
   }
 
+  // Load persisted session state. On any load error, fall back to a fresh seeded
+  // ephemeral state and continue — persistence must never break the user request.
+  let state: SessionState;
+  const canPersist = isValidSessionId(sessionId);
+  try {
+    state = canPersist ? await store.load(sessionId as string) : seedSessionState();
+  } catch {
+    state = seedSessionState();
+  }
+
+  const validPrompt = valid.prompt;
+
   const messages: GroqMessage[] = [
     { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: valid.prompt },
+    ...state.history.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user", content: validPrompt },
   ];
+
+  let finalText = "";
+
+  async function persist(reply: string): Promise<void> {
+    state.history.push({ role: "user", content: validPrompt });
+    state.history.push({ role: "assistant", content: reply });
+    if (canPersist) {
+      try {
+        await store.save(sessionId as string, state);
+      } catch {
+        // Best-effort: swallow write failures (Edge Cases "DynamoDB write fails").
+      }
+    }
+  }
 
   for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
     let res: GroqCompletion;
@@ -191,7 +251,7 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
 
         write({ type: "tool_call", name, input });
         const t0 = Date.now();
-        const output = executeTool(name, input);
+        const output = executeTool(name, input, state);
         const durationMs = Date.now() - t0;
         write({ type: "tool_result", name, output, durationMs });
 
@@ -206,12 +266,16 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
     }
 
     // No tool calls -> implicit or explicit stop.
-    write({ type: "done", summary: content || "Done." });
+    finalText = content || "Done.";
+    write({ type: "done", summary: finalText });
+    await persist(finalText);
     return { forbidden: false };
   }
 
   // Exhausted the iteration budget without a stop.
-  write({ type: "done", summary: "Reached maximum steps" });
+  finalText = "Reached maximum steps";
+  write({ type: "done", summary: finalText });
+  await persist(finalText);
   return { forbidden: false };
 }
 
@@ -266,6 +330,8 @@ async function streamHandler(
   try {
     const parsed = parseBody(event);
     const prompt = (parsed as { prompt?: unknown })?.prompt;
+    const rawSessionId = (parsed as { sessionId?: unknown })?.sessionId;
+    const sessionId = isValidSessionId(rawSessionId) ? rawSessionId : undefined;
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }) as unknown as GroqLike;
     await runAgent({
       prompt: prompt as string,
@@ -274,6 +340,8 @@ async function streamHandler(
       write: (e) => send(responseStream, e),
       allowedOrigins,
       requireOrigin,
+      sessionId,
+      store: getSessionStore(),
     });
   } catch {
     send(responseStream, { type: "error", message: "Agent failed" });
@@ -284,5 +352,9 @@ async function streamHandler(
 
 // `awslambda` is only defined inside the Lambda Node runtime. Guard the wrap so
 // importing this module in a plain Node/test context does not throw.
+// Note: @aws-sdk packages set globalThis.awslambda to an object stub at import time,
+// so we must check specifically for the streamifyResponse function, not just existence.
 export const handler =
-  typeof awslambda !== "undefined" ? awslambda.streamifyResponse(streamHandler) : streamHandler;
+  typeof awslambda !== "undefined" && typeof awslambda.streamifyResponse === "function"
+    ? awslambda.streamifyResponse(streamHandler)
+    : streamHandler;

@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { getPrice, riskCheck, openOrder, getPositions } from "../src/tools";
+import {
+  getPrice,
+  riskCheck,
+  openOrder,
+  getPositions,
+  closeAllPositions,
+  closePosition,
+} from "../src/tools";
+import { seedSessionState, type SessionState } from "../src/session-store";
 import { SUPPORTED_PAIRS } from "@shared/tool-defs";
 
 describe("mock forex tools", () => {
@@ -47,8 +55,9 @@ describe("mock forex tools", () => {
     expect(fraction).toBeLessThanOrEqual(0.28);
   });
 
-  it("open_order returns a valid filled order object", () => {
-    const out = openOrder({ pair: "GBP/USD", direction: "short", lots: 0.5 });
+  it("open_order returns a valid filled order and persists the position", () => {
+    const state: SessionState = { positions: [], history: [] };
+    const out = openOrder({ pair: "GBP/USD", direction: "short", lots: 0.5 }, state);
     expect(out.status).toBe("filled");
     expect(typeof out.orderId).toBe("string");
     expect((out.orderId as string).length).toBeGreaterThan(0);
@@ -56,23 +65,69 @@ describe("mock forex tools", () => {
     expect(out.pair).toBe("GBP/USD");
     expect(out.direction).toBe("short");
     expect(out.lots).toBe(0.5);
+    // Persisted to the passed state with the same orderId.
+    expect(state.positions).toHaveLength(1);
+    expect(state.positions[0].orderId).toBe(out.orderId);
   });
 
-  it("get_positions returns 1-3 positions with valid schema", () => {
-    for (let i = 0; i < 20; i++) {
-      const out = getPositions();
-      const positions = out.positions as Array<Record<string, unknown>>;
-      expect(Array.isArray(positions)).toBe(true);
-      expect(positions.length).toBeGreaterThanOrEqual(1);
-      expect(positions.length).toBeLessThanOrEqual(3);
-      for (const pos of positions) {
-        expect(typeof pos.pair).toBe("string");
-        expect(typeof pos.direction).toBe("string");
-        expect(typeof pos.lots).toBe("number");
-        expect(typeof pos.entryPrice).toBe("number");
-        expect(typeof pos.currentPrice).toBe("number");
-        expect(typeof pos.pnl).toBe("number");
-      }
+  it("get_positions returns persisted positions with orderId and computed currentPrice/pnl", () => {
+    const state = seedSessionState();
+    const out = getPositions(state);
+    const positions = out.positions as Array<Record<string, unknown>>;
+    expect(Array.isArray(positions)).toBe(true);
+    expect(positions).toHaveLength(2);
+    for (const pos of positions) {
+      expect(typeof pos.orderId).toBe("string");
+      expect(typeof pos.pair).toBe("string");
+      expect(typeof pos.direction).toBe("string");
+      expect(typeof pos.lots).toBe("number");
+      expect(typeof pos.entryPrice).toBe("number");
+      expect(typeof pos.currentPrice).toBe("number");
+      expect(typeof pos.pnl).toBe("number");
     }
+  });
+
+  it("get_positions on an empty state returns an empty list", () => {
+    const out = getPositions({ positions: [], history: [] });
+    expect(out.positions).toEqual([]);
+  });
+
+  it("close_all_positions empties positions and returns the count closed", () => {
+    const state = seedSessionState();
+    const out = closeAllPositions(state);
+    expect(out).toEqual({ closed: 2 });
+    expect(state.positions).toEqual([]);
+  });
+
+  it("close_all_positions with no open positions returns { closed: 0 }", () => {
+    const state: SessionState = { positions: [], history: [] };
+    expect(closeAllPositions(state)).toEqual({ closed: 0 });
+  });
+
+  it("close_position removes the matching orderId", () => {
+    const state = seedSessionState();
+    const target = state.positions[0].orderId;
+    const out = closePosition({ orderId: target }, state);
+    expect(out).toEqual({ closed: 1, orderId: target });
+    expect(state.positions.some((p) => p.orderId === target)).toBe(false);
+    expect(state.positions).toHaveLength(1);
+  });
+
+  it("close_position with an unknown orderId returns an error", () => {
+    const state = seedSessionState();
+    const out = closePosition({ orderId: "ord_doesnotexist" }, state);
+    expect(typeof out.error).toBe("string");
+    expect(out.error as string).toContain("No open position with id ord_doesnotexist");
+  });
+
+  it("seedSessionState produces exactly 2 positions, each with an orderId", () => {
+    const state = seedSessionState();
+    expect(state.positions).toHaveLength(2);
+    for (const p of state.positions) {
+      expect(typeof p.orderId).toBe("string");
+      expect(p.orderId.length).toBeGreaterThan(0);
+    }
+    expect(state.positions[0].pair).toBe("EUR/USD");
+    expect(state.positions[1].pair).toBe("USD/JPY");
   });
 });

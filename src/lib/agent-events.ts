@@ -22,6 +22,7 @@ export const PRESETS: AgentPreset[] = [
   { label: "Open a EUR/USD long", prompt: "Open a small EUR/USD long position for me" },
   { label: "My positions", prompt: "What are my current positions?" },
   { label: "Buy GBP/USD safely", prompt: "Buy GBP/USD but check risk first" },
+  { label: "How do I open a position?", prompt: "How do I open a position?" },
 ];
 
 export const PROMPT_MAX_CHARS = 500;

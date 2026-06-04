@@ -5,6 +5,7 @@ import type { AgentEvent } from "@/lib/agent-events";
 import { PROMPT_MAX_CHARS } from "@/lib/agent-events";
 import { streamAgent } from "@/lib/agent-stream";
 import { runMockAgent } from "@/components/play/MockAgent";
+import { getSessionId } from "@/lib/session-id";
 import { PromptInput } from "@/components/play/PromptInput";
 import { TraceTimeline } from "@/components/play/TraceTimeline";
 
@@ -72,7 +73,12 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
         }, COLD_START_TIMEOUT_MS);
 
         try {
-          const gen = streamAgent({ url, prompt: p, signal: controller.signal });
+          const gen = streamAgent({
+            url,
+            prompt: p,
+            sessionId: getSessionId(),
+            signal: controller.signal,
+          });
           for await (const event of gen) {
             firstEventSeen = true;
             clearTimeout(coldStart);
