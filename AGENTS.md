@@ -8,7 +8,7 @@
 
 ## What this is
 
-An interactive resume + cover letter for a Purple LAB job application. A Next.js (App Router) app with tRPC, Drizzle/SQLite, Tailwind v4, and Framer Motion. Deployed on Fly.io.
+An interactive resume + cover letter built as a work sample for a job application. A Next.js (App Router) app with tRPC, Drizzle/SQLite, Tailwind v4, and Framer Motion. Deployed on Fly.io.
 
 Read `CLAUDE.md` for the full architecture, commands, conventions, and gotchas.
 

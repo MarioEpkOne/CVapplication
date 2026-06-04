@@ -3,12 +3,12 @@
 /* Dark mode via next-themes attribute="class" — Tailwind v4 CSS-first */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ─── Brand tokens — Mario: pull exact values from Purple's site via DevTools ─── */
+/* ─── Brand tokens ─── */
 @theme {
-  /* Light background — Purple brand first impression */
+  /* Light background — first impression */
   --color-brand-bg: #f5ecff;
 
-  /* Purple accent scale (placeholders — Mario to refine from Purple's site) */
+  /* Purple accent scale */
   --color-brand-50:  #faf5ff;
   --color-brand-100: #f3e8ff;
   --color-brand-200: #e9d5ff;

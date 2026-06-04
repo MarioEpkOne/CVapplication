@@ -8,9 +8,9 @@ This is a **first-class deliverable** — rich context for Claude Code (and any 
 
 ## What this app is
 
-An interactive resume + cover letter built as a work sample for a Purple LAB job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — "Ask the Agent", a live serverless Forex agent demo backed by AWS Lambda).
+An interactive resume + cover letter built as a work sample for a job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — "Ask the Agent", a live serverless Forex agent demo backed by AWS Lambda).
 
-The medium is the message: a deliberately over-engineered Next.js app on Fly.io, with tRPC, Drizzle/SQLite, Framer Motion, and agent-context artifacts as first-class deliverables — mirroring Purple's stack on purpose.
+The medium is the message: a deliberately over-engineered Next.js app on Fly.io, with tRPC, Drizzle/SQLite, Framer Motion, and agent-context artifacts as first-class deliverables — a modern TypeScript application-layer stack on purpose.
 
 ---
 
@@ -186,7 +186,7 @@ Both are on `$PATH` via `~/.bashrc`. AWS credentials live in `~/.aws/credentials
 
 ## ADRs
 
-- `docs/adr/0001-fly-over-aws.md` — Why Fly.io, not AWS (and why the wink)
+- `docs/adr/0001-fly-over-aws.md` — Why Fly.io, not AWS (and why that's the better work sample)
 - `docs/adr/0002-sqlite-over-postgres.md` — Why SQLite on a Fly volume
 - `docs/adr/0003-print-css-pdf.md` — Why print CSS + window.print() over react-pdf
-- `docs/adr/0004-trpc-for-tiny-app.md` — Why tRPC (mirrors Purple's stack on purpose)
+- `docs/adr/0004-trpc-for-tiny-app.md` — Why tRPC (a deliberate, production-relevant choice)

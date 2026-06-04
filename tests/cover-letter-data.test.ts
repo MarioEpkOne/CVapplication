@@ -31,7 +31,7 @@ describe("cover-letter data integrity", () => {
       const ids = sections.map((s) => s.id);
       expect(ids).toContain("hook");
       expect(ids).toContain("orchestration");
-      expect(ids).toContain("why-purple");
+      expect(ids).toContain("why-here");
       expect(ids).toContain("why-me");
     });
   });

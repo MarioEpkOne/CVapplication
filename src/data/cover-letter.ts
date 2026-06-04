@@ -2,7 +2,7 @@
 // The structure (id, heading, body[]) is fixed; locale map selects the right version.
  
 export interface LetterSection {
-  id: "hook" | "orchestration" | "why-purple" | "why-me" | string;
+  id: "hook" | "orchestration" | "why-here" | "why-me" | string;
   eyebrow?: string;
   heading: string;
   body: string[]; // paragraphs
@@ -32,12 +32,12 @@ export const letterSectionsCz: LetterSection[] = [
     ],
   },
   {
-    id: "why-purple",
-    eyebrow: "Proč Purple LAB",
+    id: "why-here",
+    eyebrow: "Proč tahle práce",
     heading: "Technická analýza předchází psaní kódu.",
     body: [
-      "Přistupuji k problémům se stejnou rigorozitou, jakou vidím v přístupu Purple LAB - nejdřív porozumět systému, pak navrhovat řešení. Líbí se mi, že u vás technická analýza předchází kódování, protože sám to dělám podobně.",
-    
+      "Přistupuji k problémům s rigorozitou - nejdřív porozumět systému, pak navrhovat řešení. Hledám tým, kde technická analýza předchází kódování, protože sám to dělám podobně.",
+
     ],
   },
   {
@@ -75,12 +75,12 @@ export const letterSectionsEn: LetterSection[] = [
     ],
   },
   {
-    id: "why-purple",
-    eyebrow: "Why Purple LAB",
+    id: "why-here",
+    eyebrow: "Why this work",
     heading: "Technical analysis comes before writing code.",
     body: [
       "When I start a new project I build a high-level plan first. What I'm actually building and why. Then I look for the weak spots and focus on the decisions that matter, usually around security, data consistency, error handling or cloud cost.",
-      "Only then do the concrete tasks fall out, the kind you can hand to a person or an agent. I like that at Purple LAB the technical analysis comes before the coding, because that's how I work too.",
+      "Only then do the concrete tasks fall out, the kind you can hand to a person or an agent. I want to work somewhere the technical analysis comes before the coding, because that's how I work too.",
     ],
   },
   {

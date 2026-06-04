@@ -11,7 +11,7 @@ The app needs persistent storage for two purposes:
 1. Contact form submissions (`contact_messages`)
 2. Pageview analytics (`pageviews`)
 
-The natural default for a production web app would be Postgres — it's what Purple uses, it's what most teams reach for, and Fly.io supports managed Postgres.
+The natural default for a production web app would be Postgres — it's what most teams reach for, and Fly.io supports managed Postgres.
 
 ---
 

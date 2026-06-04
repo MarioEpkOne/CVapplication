@@ -22,9 +22,9 @@ Use **tRPC v11** with `createTRPCReact` + `httpBatchLink` + `superjson`. Full ty
 
 ## Rationale
 
-### It mirrors Purple's stack — on purpose
+### It's a deliberate, production-relevant choice
 
-Purple Technology uses tRPC (it's part of their application-layer stack). Using tRPC here is a deliberate signal: *I've shipped tRPC in production, not just read about it.* This is a work sample; every technology choice is an argument.
+tRPC is a mainstream choice in the modern TypeScript application layer. Using it here is a deliberate signal: *I've shipped tRPC in production, not just read about it.* This is a work sample; every technology choice is an argument.
 
 ### End-to-end type safety with zero boilerplate
 
@@ -58,7 +58,7 @@ trpc.createClient({ transformer: superjson }) // v10 style — breaks in v11
 
 ## Consequences
 
-- **Positive**: Purple sees familiar technology; demonstrates production knowledge.
+- **Positive**: uses familiar, mainstream technology; demonstrates production knowledge.
 - **Positive**: type-safe mutations with no extra layer.
 - **Positive**: structured error codes on the client.
 - **Neutral**: tRPC adds ~50KB to the client bundle (offset by superjson; acceptable for this app).

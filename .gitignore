@@ -41,3 +41,9 @@ coverage/
 
 # Fly
 .fly/
+
+# Internal working artifacts (not shipped to the remote)
+specs/
+Working Logs/
+Implementation Plans/
+learnings.md

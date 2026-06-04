@@ -1,8 +1,8 @@
-# Mario Alina — Interactive Resume for Purple LAB
+# Mario Alina — Interactive Resume
 
 > A work sample that is the argument.
 
-This is a deliberately over-engineered interactive resume + cover letter, built as a job application for [Purple Technology (Purple LAB)](https://www.purplelab.io/) in Brno. The app mirrors Purple's application-layer stack — TypeScript, Next.js, Tailwind, tRPC — while being honestly deployed on Fly.io instead of AWS. (Ask me why. Or read the [ADR](docs/adr/0001-fly-over-aws.md).)
+This is a deliberately over-engineered interactive resume + cover letter, built as a job-application work sample. It uses a modern TypeScript application-layer stack — Next.js, Tailwind, tRPC — while being honestly deployed on Fly.io instead of AWS. (Ask me why. Or read the [ADR](docs/adr/0001-fly-over-aws.md).)
 
 ---
 
@@ -16,7 +16,7 @@ This is a deliberately over-engineered interactive resume + cover letter, built 
 
 ### Features
 - **Print-to-PDF**: browser print with CSS that hides UI chrome and forces light colors
-- **Dark mode**: default light (`#f5ecff` Purple brand), toggle persists to localStorage
+- **Dark mode**: default light (`#f5ecff` brand background), toggle persists to localStorage
 - **Cookieless analytics**: first-party pageview tRPC ping to SQLite — no third-party, no cookie banner
 - **OG image**: branded purple card via `next/og`
 - **Vitest suite**: covers sanitization, rate-limit, and data integrity
@@ -51,9 +51,9 @@ Migration runs automatically on container start via `scripts/start.sh` → `scri
 
 ---
 
-## AWS shop, runs on Fly
+## AWS by default, runs on Fly
 
-Purple is an AWS shop. This app runs on Fly.io — intentionally, self-awarely, and with a [documented rationale](docs/adr/0001-fly-over-aws.md). The ADR argues the case. The cover letter acknowledges it. The footer winks about it.
+The conventional default would be AWS. This app runs on Fly.io instead — intentionally, self-awarely, and with a [documented rationale](docs/adr/0001-fly-over-aws.md). The ADR argues the case: pick the tool that fits the workload, and be able to explain why.
 
 ---
 

@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     template: "%s | Mario Alina",
   },
   description:
-    "Interactive resume + cover letter for Purple LAB. Built with Next.js, tRPC, Drizzle, and Framer Motion — a work sample that is the argument.",
+    "Interactive resume + cover letter. Built with Next.js, tRPC, Drizzle, and Framer Motion — a work sample that is the argument.",
   openGraph: {
-    title: "Mario Alina — Interactive Resume for Purple LAB",
+    title: "Mario Alina — Interactive Resume",
     description:
       "An over-engineered interactive resume that doubles as a work sample for AI agent orchestration.",
     type: "website",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mario Alina — Interactive Resume for Purple LAB",
+    title: "Mario Alina — Interactive Resume",
   },
 };
 
@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <main className="flex-1">{children}</main>
                 <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
                   <p>
-                    Built by Mario Alina for Purple LAB.{" "}
+                    Built by Mario Alina.{" "}
                     <a
                       href="https://github.com/MarioEpkOne/CVapplication"
                       target="_blank"

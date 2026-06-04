@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "Mario Alina — Interactive Resume for Purple LAB";
+export const alt = "Mario Alina — Interactive Resume";
 
 // Default Node runtime — compatible with standalone output on Fly
 // (edge runtime unnecessary here; Node runtime is simpler and avoids edge constraints)
@@ -37,7 +37,7 @@ export default function OGImage() {
             marginBottom: "24px",
           }}
         >
-          Work sample for Purple LAB
+          Work sample
         </div>
 
         {/* Name */}
