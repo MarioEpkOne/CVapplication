@@ -1,5 +1,18 @@
-<!-- last-commit: 1efaa28959b477d1684ce8ef9af5c548769be6ba -->
+<!-- last-commit: e6af3186d4c882b8d3d195f4bc22a05921ea8cc1 -->
 # Patch Notes
+
+## v0.10.0 — 2026-06-04
+
+### stateful Forex agent — persist positions + fix how-to auto-open
+The "Ask the Agent" Play demo is now genuinely interactive. Positions you open or close persist across prompts and page reloads via a new DynamoDB session store (keyed by a per-browser session id, auto-expiring on a TTL) instead of being re-randomized on every call — so "close all my positions" actually sticks. The agent gains `close_all_positions` and `close_position` tools, `get_positions` now returns order ids, and new sessions start with two seeded demo positions. The system prompt was reworked to tell apart questions from instructions: asking "How do I open a position?" now explains the steps and offers to do it (and only acts once you confirm) rather than silently opening a trade — backed by capped conversation history persisted alongside positions. A matching preset was added, the offline mock agent became prompt-aware, and `CLAUDE.md` was updated to document the six Lambda tools. Requires an `sst deploy` to create the DynamoDB table and redeploy the Lambda.
+
+## v0.9.1 — 2026-06-04
+
+### generalize CV to remove company-specific references
+Reworked the site so the resume and cover letter read as a general work sample rather than being aimed at one company: greetings, footer, the cover-letter "why" section (`why-purple` → `why-here`), project blurbs, SEO/OG metadata, and the living docs (README, AGENTS.md, CLAUDE.md, ADRs) were all reframed around generic engineering judgment. Internal pipeline artifacts (`specs/`, `Working Logs/`, `Implementation Plans/`, `learnings.md`) are now gitignored and untracked so they stop shipping to the remote. The purple brand palette is retained.
+
+### align resume/cover-letter copy with the actual app
+Fixed content-vs-reality gaps surfaced by a content audit. The EN résumé summary's "four years" is corrected to "three years" (the Czech "3 let" was already right), the live `/play` "Ask the Agent" demo is now mentioned — framed as work-in-progress — in both the résumé blurb and the cover-letter hook across both locales, and the English cover letter is reconciled to the canonical Czech structure. Also fixes several Czech typos and stray whitespace. Content-only: edits are limited to `src/data/resume.ts` and `src/data/cover-letter.ts`, the single source of truth for all copy.
 
 ## v0.9.0 — 2026-06-03
 
