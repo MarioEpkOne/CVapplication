@@ -144,7 +144,7 @@ export const resumeCs: ResumeData = {
       name: "Tato CV aplikace",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce. Next.js, tRPC, Drizzle, agent-context artefakty jako deliverable první třídy.",
+        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce. Next.js, tRPC, Drizzle, agent-context artefakty jako deliverable první třídy. Součástí je i rozpracovaná živá ukázka „Zeptej se agenta“ (serverless agent na AWS Lambda) — zatím experimentální.",
     },
   ],
 
@@ -179,7 +179,7 @@ export const resumeEn: ResumeData = {
   },
 
   summary:
-    "I specialise in AI agent orchestration and backend systems development. I arrived at agentic approaches independently — by building closed-loop pipelines with Claude Code where agents plan, write code, and hand off context through structured artifacts. On the backend side, I bring four years of commercial Java/Kotlin/Spring Boot development across fintech, pharma, and logistics domains.",
+    "I specialise in AI agent orchestration and backend systems development. I arrived at agentic approaches independently — by building closed-loop pipelines with Claude Code where agents plan, write code, and hand off context through structured artifacts. On the backend side, I bring three years of commercial Java/Kotlin/Spring Boot development across fintech, pharma, and logistics domains.",
 
   experience: [
     {
@@ -301,7 +301,7 @@ export const resumeEn: ResumeData = {
       name: "This CV App",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "A deliberately over-engineered interactive resume + cover letter built as a work sample. Next.js, tRPC, Drizzle, agent-context artifacts as first-class deliverables.",
+        "A deliberately over-engineered interactive resume + cover letter built as a work sample. Next.js, tRPC, Drizzle, agent-context artifacts as first-class deliverables. Includes a work-in-progress live \"Ask the Agent\" demo (a serverless agent on AWS Lambda) — still experimental.",
     },
   ],
 
