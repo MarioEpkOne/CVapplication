@@ -1,5 +1,5 @@
 // Client-only: a stable per-browser session id for the Ask-the-Agent demo.
-// Stored in localStorage so positions persist across reloads (D2). Uses the
+// Stored in localStorage so the agent's conversation history persists across reloads (D6). Uses the
 // browser-native crypto.randomUUID() — no extra dependency.
 
 const STORAGE_KEY = "agent-session-id";

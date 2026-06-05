@@ -1,6 +1,79 @@
-import { describe, it, expect } from "vitest";
-import { parseNdjsonChunk } from "@/lib/agent-stream";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { parseNdjsonChunk, streamAgent } from "@/lib/agent-stream";
 import type { AgentEvent } from "@/lib/agent-events";
+
+// Fake Response builder for streamAgent body-shape tests.
+function fakeResponse(lines: string[]) {
+  let i = 0;
+  const enc = new TextEncoder();
+  return {
+    ok: true,
+    status: 200,
+    body: {
+      getReader() {
+        return {
+          read: async () =>
+            i < lines.length
+              ? { done: false, value: enc.encode(lines[i++]) }
+              : { done: true, value: undefined },
+        };
+      },
+    },
+  } as unknown as Response;
+}
+
+describe("streamAgent body", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("streamAgent chat body includes mode and prompt", async () => {
+    let capturedBody: string | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init: RequestInit) => {
+        capturedBody = init.body as string;
+        return Promise.resolve(fakeResponse(['{"type":"done","summary":"ok"}\n']));
+      }),
+    );
+    const events: AgentEvent[] = [];
+    for await (const e of streamAgent({
+      url: "http://x",
+      mode: "chat",
+      prompt: "hi",
+      sessionId: "s",
+    })) {
+      events.push(e);
+    }
+    const body = JSON.parse(capturedBody!);
+    expect(body.mode).toBe("chat");
+    expect(body.prompt).toBe("hi");
+    expect(body.sessionId).toBe("s");
+  });
+
+  it("streamAgent pitch body includes mode and locale, no prompt", async () => {
+    let capturedBody: string | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init: RequestInit) => {
+        capturedBody = init.body as string;
+        return Promise.resolve(fakeResponse(['{"type":"done","summary":"ok"}\n']));
+      }),
+    );
+    const events: AgentEvent[] = [];
+    for await (const e of streamAgent({
+      url: "http://x",
+      mode: "pitch",
+      locale: "cs",
+    })) {
+      events.push(e);
+    }
+    const body = JSON.parse(capturedBody!);
+    expect(body.mode).toBe("pitch");
+    expect(body.locale).toBe("cs");
+    expect(body.prompt).toBeUndefined();
+  });
+});
 
 describe("parseNdjsonChunk", () => {
   it("parses complete NDJSON lines into AgentEvent objects", () => {

@@ -23,6 +23,11 @@ export const labels = {
     downloadPdf: "Stáhnout PDF",
     openToRoles: "Otevřen nabídkám",
     connect: "Spojme se",
+    whyHireMe: "Proč mě najmout?",
+    agentRun: "Spustit",
+    agentRunning: "Pracuji…",
+    agentPlaceholder: "Zeptej se na cokoli o Mariovi — např. Proč bychom tě měli najmout?",
+    agentPromptAria: "Otázka pro agenta",
   },
   en: {
     experience: "Experience",
@@ -48,6 +53,11 @@ export const labels = {
     downloadPdf: "Download PDF",
     openToRoles: "Open to roles",
     connect: "Connect",
+    whyHireMe: "Why hire me?",
+    agentRun: "Run agent",
+    agentRunning: "Running…",
+    agentPlaceholder: "Ask anything about Mario — e.g. Why should we hire you?",
+    agentPromptAria: "Question for the agent",
   },
 } as const;
 

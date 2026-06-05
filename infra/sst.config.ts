@@ -19,7 +19,7 @@ export default $config({
         ? ["https://mario-portfolio.fly.dev"]
         : ["https://mario-portfolio.fly.dev", "http://localhost:3000"];
 
-    // Session store for persisted Forex positions + conversation history (D1).
+    // Session store for the agent's conversation history (D6).
     // DynamoDB auto-deletes items after the `expiresAt` epoch-seconds TTL.
     const sessions = new sst.aws.Dynamo("AgentSessions", {
       fields: { sessionId: "string" },

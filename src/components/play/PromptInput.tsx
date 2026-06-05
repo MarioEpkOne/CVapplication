@@ -2,22 +2,34 @@
 
 import { cn } from "@/lib/utils";
 import { PRESETS, PROMPT_MAX_CHARS } from "@/lib/agent-events";
+import type { Locale } from "@/lib/locale";
+import { labels } from "@/lib/labels";
 
 interface PromptInputProps {
   value: string;
   onChange: (v: string) => void;
   onSubmit: () => void;
   onPreset: (prompt: string) => void;
+  onPitch: () => void;
   disabled: boolean;
+  locale: Locale;
 }
 
-export function PromptInput({ value, onChange, onSubmit, onPreset, disabled }: PromptInputProps) {
+export function PromptInput({
+  value,
+  onChange,
+  onSubmit,
+  onPreset,
+  onPitch,
+  disabled,
+  locale,
+}: PromptInputProps) {
   const canSubmit = !disabled && value.trim().length > 0;
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {PRESETS.map((preset) => (
+      <div className="no-print flex flex-wrap gap-2">
+        {PRESETS[locale].map((preset) => (
           <button
             key={preset.label}
             type="button"
@@ -46,28 +58,43 @@ export function PromptInput({ value, onChange, onSubmit, onPreset, disabled }: P
         maxLength={PROMPT_MAX_CHARS}
         disabled={disabled}
         rows={3}
-        placeholder="e.g. Check the current EUR/USD price and open a small long if risk allows"
+        placeholder={labels[locale].agentPlaceholder}
         className="w-full resize-y rounded-lg border border-brand-300 bg-white px-3 py-2 text-sm text-brand-900 placeholder:text-brand-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-brand-700 dark:bg-brand-900 dark:text-brand-100"
-        aria-label="Agent prompt"
+        aria-label={labels[locale].agentPromptAria}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-brand-400">
           {value.length}/{PROMPT_MAX_CHARS}
         </span>
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={!canSubmit}
-          className={cn(
-            "rounded-md px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
-            canSubmit
-              ? "bg-brand-600 text-white hover:bg-brand-700"
-              : "cursor-not-allowed bg-brand-200 text-brand-400 dark:bg-brand-800 dark:text-brand-600",
-          )}
-        >
-          {disabled ? "Running…" : "Run agent"}
-        </button>
+        <div className="no-print flex gap-2">
+          <button
+            type="button"
+            onClick={onPitch}
+            disabled={disabled}
+            className={cn(
+              "rounded-md px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+              !disabled
+                ? "border border-brand-600 text-brand-600 hover:bg-brand-50 dark:border-brand-400 dark:text-brand-400 dark:hover:bg-brand-900"
+                : "cursor-not-allowed border border-brand-200 text-brand-400 dark:border-brand-800 dark:text-brand-600",
+            )}
+          >
+            {labels[locale].whyHireMe}
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={!canSubmit}
+            className={cn(
+              "rounded-md px-4 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+              canSubmit
+                ? "bg-brand-600 text-white hover:bg-brand-700"
+                : "cursor-not-allowed bg-brand-200 text-brand-400 dark:bg-brand-800 dark:text-brand-600",
+            )}
+          >
+            {disabled ? labels[locale].agentRunning : labels[locale].agentRun}
+          </button>
+        </div>
       </div>
     </div>
   );

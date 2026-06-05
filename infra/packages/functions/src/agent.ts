@@ -1,7 +1,6 @@
 import Groq from "groq-sdk";
-import { FOREX_TOOLS } from "@shared/tool-defs";
+import { BIO_FACTS } from "@shared/bio";
 import type { AgentEvent } from "@shared/events";
-import { executeTool } from "./tools";
 import { checkRateLimit } from "./rate-limit";
 import {
   type SessionStore,
@@ -10,25 +9,33 @@ import {
   getSessionStore,
 } from "./session-store";
 
-const MAX_ITERATIONS = 4;
 const MAX_OUTPUT_TOKENS = 512;
 const PROMPT_MAX_CHARS = 500;
 const MODEL = "llama-3.3-70b-versatile";
 
-const SYSTEM_PROMPT = `You are a Forex trading agent with tools to check prices, assess risk, open orders, view positions, and close positions. Positions persist for the user across messages.
+// System prompt: roast agent grounded in real bio facts. No tools.
+const ROAST_SYSTEM_PROMPT = `You are Mario Alina's witty hype-agent on his
+interactive CV. Answer questions about Mario in a SELF-DEPRECATING, funny way —
+roast him affectionately — but every claim must be grounded in the facts below,
+and the punchline should still make a hiring manager want to hire him. Keep it
+to a few sentences. Detect the language of the user's question and answer in
+that language (Czech or English). Never invent facts not present below; if asked
+something you don't know, joke about not knowing rather than making it up.
 
-Distinguish informational questions from instructions. If the user asks how something works or how to do it (e.g. "how do I open a position?"), explain the steps in plain text and OFFER to do it ("Shall I open a 0.1-lot EUR/USD long for you?") — but do NOT call any trading tool yet. Only call open_order / close_position / close_all_positions when the user gives a direct instruction or confirms a pending offer ("yes", "do it").
+FACTS:
+${BIO_FACTS}`;
 
-Before opening: always get_price, then risk_check; if risk is rejected, explain why and suggest an alternative. To close, use close_position (by orderId) or close_all_positions. Be concise.`;
+// Exported for test support — tests assert against PITCH_INSTRUCTION values.
+export const PITCH_INSTRUCTION: Record<"cs" | "en", string> = {
+  en: "In 2–3 funny, self-deprecating but ultimately convincing sentences, make the case for why we should hire you.",
+  cs: "Ve 2–3 vtipných, sebeironických, ale nakonec přesvědčivých větách vysvětli, proč bychom tě měli najmout.",
+};
 
-const KNOWN_TOOLS = new Set([
-  "get_price",
-  "risk_check",
-  "open_order",
-  "get_positions",
-  "close_all_positions",
-  "close_position",
-]);
+// Exported for test support — tests assert against REASONING_FLAVOR values.
+export const REASONING_FLAVOR: Record<"cs" | "en", string> = {
+  en: "Consulting my inflated sense of self…",
+  cs: "Radím se se svým nafouknutým egem…",
+};
 
 // awslambda is provided by the Lambda Node runtime at execution time.
 declare const awslambda: {
@@ -63,6 +70,7 @@ export interface GroqLike {
   };
 }
 
+// Keep GroqToolCall and tool_calls? field — harmless, unused, avoids churn.
 interface GroqToolCall {
   id: string;
   function: { name: string; arguments: string };
@@ -107,7 +115,9 @@ export function isValidSessionId(sessionId: unknown): sessionId is string {
 }
 
 export interface RunAgentOptions {
-  prompt: string;
+  mode: "chat" | "pitch";
+  prompt?: string;
+  locale?: "cs" | "en";
   origin?: string;
   groq: GroqLike;
   write: (e: AgentEvent) => void;
@@ -117,16 +127,13 @@ export interface RunAgentOptions {
   store: SessionStore;
 }
 
-// Groq's Llama 3.3 70B intermittently emits tool calls in a malformed text
-// syntax (`<function=name{...}>`) instead of structured tool_calls; Groq rejects
-// these server-side with a 400 `tool_use_failed`. `temperature: 0` makes correct,
-// structured tool calls overwhelmingly likely (measured 0/10 failures vs ~4/10 at
-// the default temperature), and a single retry covers the residual stochastic case.
+// temperature: 0 makes structured responses overwhelmingly reliable.
+// The defensive tool_use_failed retry is kept even with no tools passed —
+// Groq may still emit a 400 with that code in rare stochastic cases (D13/E).
 async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promise<GroqCompletion> {
   const args = {
     model: MODEL,
     messages,
-    tools: FOREX_TOOLS,
     max_tokens: MAX_OUTPUT_TOKENS,
     temperature: 0,
   };
@@ -141,11 +148,15 @@ async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promis
   }
 }
 
-// Core agent loop, factored out so it is testable without the Lambda runtime global.
-// Returns 403 sentinel (false) when the origin is disallowed; otherwise true.
+// Core agent — single Groq completion, no tool-calling loop.
+// chat mode: stateful (history in DynamoDB), requires a prompt.
+// pitch mode: stateless one-shot "Why hire me?", ignores sessionId/history.
+// Returns { forbidden: true } when origin gate fires; otherwise { forbidden: false }.
 export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: boolean }> {
   const {
+    mode,
     prompt,
+    locale = "en",
     origin,
     groq,
     write,
@@ -159,123 +170,75 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
     return { forbidden: true };
   }
 
-  const valid = validatePrompt(prompt);
-  if (!valid.ok) {
-    write({ type: "error", message: valid.message });
-    return { forbidden: false };
-  }
+  // Build the model messages for the requested mode.
+  let messages: GroqMessage[];
+  let validPrompt = ""; // only set for chat (used for persistence)
+  let canPersist = false;
+  let persist: ((reply: string) => Promise<void>) | undefined;
 
-  // Load persisted session state. On any load error, fall back to a fresh seeded
-  // ephemeral state and continue — persistence must never break the user request.
-  let state: SessionState;
-  const canPersist = isValidSessionId(sessionId);
-  try {
-    state = canPersist ? await store.load(sessionId as string) : seedSessionState();
-  } catch {
-    state = seedSessionState();
-  }
-
-  const validPrompt = valid.prompt;
-
-  const messages: GroqMessage[] = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...state.history.map((m) => ({ role: m.role, content: m.content })),
-    { role: "user", content: validPrompt },
-  ];
-
-  let finalText = "";
-
-  async function persist(reply: string): Promise<void> {
-    state.history.push({ role: "user", content: validPrompt });
-    state.history.push({ role: "assistant", content: reply });
-    if (canPersist) {
-      try {
-        await store.save(sessionId as string, state);
-      } catch {
-        // Best-effort: swallow write failures (Edge Cases "DynamoDB write fails").
-      }
-    }
-  }
-
-  for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-    let res: GroqCompletion;
-    try {
-      res = await createCompletion(groq, messages);
-    } catch (err) {
-      const status = (err as { status?: number })?.status;
-      if (status === 429) {
-        write({ type: "error", message: "Agent is busy, try again shortly" });
-      } else {
-        write({ type: "error", message: "The agent could not reach its model. Please try again." });
-      }
+  if (mode === "pitch") {
+    // Stateless one-shot: ignore sessionId/history entirely (Edge Case).
+    write({ type: "reasoning", delta: REASONING_FLAVOR[locale] });
+    messages = [
+      { role: "system", content: ROAST_SYSTEM_PROMPT },
+      { role: "user", content: PITCH_INSTRUCTION[locale] },
+    ];
+  } else {
+    // chat mode
+    const valid = validatePrompt(prompt);
+    if (!valid.ok) {
+      write({ type: "error", message: valid.message });
       return { forbidden: false };
     }
+    validPrompt = valid.prompt;
 
-    const choice = res.choices[0];
-    const content = choice?.message?.content ?? "";
-    if (content && content.trim().length > 0) {
-      write({ type: "reasoning", delta: content });
+    // Load persisted history; on any load error fall back to empty (seeded) state.
+    let state: SessionState;
+    canPersist = isValidSessionId(sessionId);
+    try {
+      state = canPersist ? await store.load(sessionId as string) : seedSessionState();
+    } catch {
+      state = seedSessionState();
     }
 
-    const toolCalls = choice?.message?.tool_calls;
-    if (toolCalls && toolCalls.length > 0) {
-      // Append the assistant message (with tool_calls) to the conversation.
-      messages.push({
-        role: "assistant",
-        content: content || "",
-        tool_calls: toolCalls,
-      });
+    write({ type: "reasoning", delta: REASONING_FLAVOR.en });
+    messages = [
+      { role: "system", content: ROAST_SYSTEM_PROMPT },
+      ...state.history.map((m) => ({ role: m.role, content: m.content })),
+      { role: "user", content: validPrompt },
+    ];
 
-      for (const call of toolCalls) {
-        const name = call.function.name;
-        let input: Record<string, unknown> = {};
+    // Persist {user, assistant} turns after a successful completion.
+    persist = async (reply: string) => {
+      state.history.push({ role: "user", content: validPrompt });
+      state.history.push({ role: "assistant", content: reply });
+      if (canPersist) {
         try {
-          const parsed = JSON.parse(call.function.arguments || "{}");
-          if (parsed && typeof parsed === "object") input = parsed as Record<string, unknown>;
+          await store.save(sessionId as string, state);
         } catch {
-          input = {};
+          // Best-effort: swallow write failures.
         }
-
-        if (!KNOWN_TOOLS.has(name)) {
-          console.warn("Unknown tool requested (name omitted from log)");
-          write({ type: "reasoning", delta: "I tried to use an unavailable tool." });
-          messages.push({
-            role: "tool",
-            content: JSON.stringify({ error: `Unavailable tool: ${name}` }),
-            // tool_call_id is required by the API; include it via a cast below.
-          } as GroqMessage & { tool_call_id: string });
-          (messages[messages.length - 1] as GroqMessage & { tool_call_id: string }).tool_call_id =
-            call.id;
-          continue;
-        }
-
-        write({ type: "tool_call", name, input });
-        const t0 = Date.now();
-        const output = executeTool(name, input, state);
-        const durationMs = Date.now() - t0;
-        write({ type: "tool_result", name, output, durationMs });
-
-        messages.push({
-          role: "tool",
-          content: JSON.stringify(output),
-        } as GroqMessage & { tool_call_id: string });
-        (messages[messages.length - 1] as GroqMessage & { tool_call_id: string }).tool_call_id =
-          call.id;
       }
-      continue;
-    }
+    };
+  }
 
-    // No tool calls -> implicit or explicit stop.
-    finalText = content || "Done.";
-    write({ type: "done", summary: finalText });
-    await persist(finalText);
+  let res: GroqCompletion;
+  try {
+    res = await createCompletion(groq, messages);
+  } catch (err) {
+    const status = (err as { status?: number })?.status;
+    if (status === 429) {
+      write({ type: "error", message: "Agent is busy, try again shortly" });
+    } else {
+      write({ type: "error", message: "The agent could not reach its model. Please try again." });
+    }
     return { forbidden: false };
   }
 
-  // Exhausted the iteration budget without a stop.
-  finalText = "Reached maximum steps";
-  write({ type: "done", summary: finalText });
-  await persist(finalText);
+  const answer =
+    res.choices[0]?.message?.content?.trim() || "…I appear to be speechless. That's rare.";
+  write({ type: "done", summary: answer });
+  if (mode === "chat" && persist) await persist(answer);
   return { forbidden: false };
 }
 
@@ -329,12 +292,18 @@ async function streamHandler(
 
   try {
     const parsed = parseBody(event);
+    const rawMode = (parsed as { mode?: unknown })?.mode;
+    const mode: "chat" | "pitch" = rawMode === "pitch" ? "pitch" : "chat";
     const prompt = (parsed as { prompt?: unknown })?.prompt;
+    const rawLocale = (parsed as { locale?: unknown })?.locale;
+    const locale: "cs" | "en" = rawLocale === "cs" ? "cs" : "en";
     const rawSessionId = (parsed as { sessionId?: unknown })?.sessionId;
     const sessionId = isValidSessionId(rawSessionId) ? rawSessionId : undefined;
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }) as unknown as GroqLike;
     await runAgent({
-      prompt: prompt as string,
+      mode,
+      prompt: prompt as string | undefined,
+      locale,
       origin,
       groq,
       write: (e) => send(responseStream, e),

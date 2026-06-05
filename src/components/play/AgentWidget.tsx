@@ -6,6 +6,7 @@ import { PROMPT_MAX_CHARS } from "@/lib/agent-events";
 import { streamAgent } from "@/lib/agent-stream";
 import { runMockAgent } from "@/components/play/MockAgent";
 import { getSessionId } from "@/lib/session-id";
+import { useLocale } from "@/lib/locale";
 import { PromptInput } from "@/components/play/PromptInput";
 import { TraceTimeline } from "@/components/play/TraceTimeline";
 
@@ -19,6 +20,7 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
   const [events, setEvents] = useState<AgentEvent[]>([]);
   const [mockMode, setMockMode] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const { locale } = useLocale();
 
   // Abort any in-flight stream on unmount.
   useEffect(() => {
@@ -36,12 +38,15 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
   }, []);
 
   const run = useCallback(
-    async (raw: string) => {
+    async (mode: "chat" | "pitch", raw?: string) => {
       // Single-flight: ignore while a run is in progress.
       if (abortRef.current) return;
 
-      const p = raw.slice(0, PROMPT_MAX_CHARS).trim();
-      if (!p) return;
+      let p: string | undefined;
+      if (mode === "chat") {
+        p = (raw ?? "").slice(0, PROMPT_MAX_CHARS).trim();
+        if (!p) return;
+      }
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -54,13 +59,13 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
       // NEXT_PUBLIC_AGENT_MODE is a dev-only build-time toggle (.env.local).
       // The Lambda URL arrives as a prop so it can be read from the server at
       // runtime (see play/page.tsx) rather than inlined into the client bundle.
-      const mode = process.env.NEXT_PUBLIC_AGENT_MODE;
+      const envMode = process.env.NEXT_PUBLIC_AGENT_MODE;
       const url = agentUrl;
 
       try {
-        if (mode === "mock" || !url) {
+        if (envMode === "mock" || !url) {
           setMockMode(true);
-          await consume(runMockAgent({ prompt: p, signal: controller.signal }));
+          await consume(runMockAgent({ mode, prompt: p, locale, signal: controller.signal }));
           return;
         }
 
@@ -73,12 +78,11 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
         }, COLD_START_TIMEOUT_MS);
 
         try {
-          const gen = streamAgent({
-            url,
-            prompt: p,
-            sessionId: getSessionId(),
-            signal: controller.signal,
-          });
+          const gen = streamAgent(
+            mode === "pitch"
+              ? { url, mode, locale, signal: controller.signal }
+              : { url, mode, prompt: p, sessionId: getSessionId(), signal: controller.signal },
+          );
           for await (const event of gen) {
             firstEventSeen = true;
             clearTimeout(coldStart);
@@ -101,7 +105,7 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
           setMockMode(true);
           setEvents([]);
           setStatus("streaming");
-          await consume(runMockAgent({ prompt: p, signal: fallbackController.signal }));
+          await consume(runMockAgent({ mode, prompt: p, locale, signal: fallbackController.signal }));
         } finally {
           clearTimeout(coldStart);
         }
@@ -115,7 +119,7 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
         }
       }
     },
-    [consume, agentUrl],
+    [consume, agentUrl, locale],
   );
 
   const streaming = status === "streaming";
@@ -125,12 +129,14 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
       <PromptInput
         value={prompt}
         onChange={setPrompt}
-        onSubmit={() => run(prompt)}
+        onSubmit={() => run("chat", prompt)}
         onPreset={(p) => {
           setPrompt(p);
-          run(p);
+          run("chat", p);
         }}
+        onPitch={() => run("pitch")}
         disabled={streaming}
+        locale={locale}
       />
 
       {streaming && events.length === 0 && (

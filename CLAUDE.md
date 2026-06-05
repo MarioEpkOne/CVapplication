@@ -8,7 +8,7 @@ This is a **first-class deliverable** — rich context for Claude Code (and any 
 
 ## What this app is
 
-An interactive resume + cover letter built as a work sample for a job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — "Ask the Agent", a live serverless Forex agent demo backed by AWS Lambda).
+An interactive resume + cover letter built as a work sample for a job application. Three URL-routed tabs: **Resume** (`/`), **Cover Letter** (`/cover-letter`), **Play** (`/play` — "Ask the Agent", a live serverless agent that answers questions about Mario in a self-deprecating, funny way backed by AWS Lambda).
 
 The medium is the message: a deliberately over-engineered Next.js app on Fly.io, with tRPC, Drizzle/SQLite, Framer Motion, and agent-context artifacts as first-class deliverables — a modern TypeScript application-layer stack on purpose.
 
@@ -38,7 +38,7 @@ The Play page is backed by an AWS Lambda deployed with SST, living in the `infra
 ```bash
 cd infra && npm install                      # install infra workspace deps (groq-sdk, sst, vitest)
 cd infra && npm run typecheck                 # tsc over packages/functions (resolves @shared/*)
-cd infra && npm test                          # vitest run (tools + agent-loop unit tests)
+cd infra && npm test                          # vitest run (agent + session-store unit tests)
 cd infra && npx sst deploy --stage prod       # deploy the Lambda Function URL (CI does this)
 cd infra && npx sst secret set GroqApiKey <value> --stage prod   # one-time: set the Groq API key
 ```
@@ -66,7 +66,7 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 ├── App routes (RSC + client components)
 │   ├── /              → Resume (default tab)
 │   ├── /cover-letter  → Cover Letter (scrollytelling)
-│   └── /play          → "Ask the Agent" serverless Forex agent demo
+│   └── /play          → "Ask the Agent" — about-me roast agent (serverless)
 ├── tRPC router (at /api/trpc/[trpc])
 │   └── analytics.track (mutation) → pageview insert (fire-and-forget)
 ├── Drizzle ORM → SQLite at DATABASE_PATH (default: /data/app.db on Fly volume)
@@ -74,14 +74,14 @@ Next.js (App Router, TS) on Fly.io (single machine, region fra)
 
 infra/ (separate SST workspace, NOT part of the Next.js build)
 └── AWS Lambda (eu-central-1, Function URL, RESPONSE_STREAM) running a bounded
-    Groq Llama 3.3 70B tool-calling loop over mock Forex tools
+    Groq Llama 3.3 70B single-completion chat (no tools)
 ```
 
 ### Ask the Agent (Play page)
 
-- `src/app/play/page.tsx` renders `AgentWidget` (English-only, D7). The widget POSTs a prompt to the Lambda Function URL and renders the streamed **NDJSON** `AgentEvent` lines as a terminal-style trace timeline.
-- The Lambda (`infra/packages/functions/src/agent.ts`) runs a bounded agent loop (`MAX_ITERATIONS=4`, `MAX_OUTPUT_TOKENS=512`, `PROMPT_MAX_CHARS=500`, 30s timeout) calling Groq with six **mock** Forex tools (`get_price`, `risk_check`, `open_order`, `get_positions`, `close_all_positions`, `close_position` — no real trading, no external APIs).
-- On any Lambda error/timeout, or when `AGENT_URL` is unset / `NEXT_PUBLIC_AGENT_MODE=mock`, the frontend silently falls back to a **prompt-aware, stateless** offline mock agent (`src/components/play/MockAgent.ts`) and shows a "mock mode" badge. The mock branches on the lowercased prompt: how-to → explain + offer (no trading tool called), "close" → close trace, "open"/"buy"/"long"/"short" → open trace, "position" → seeded positions list, default → reasoning + offer. It is stateless (no offline persistence — no DynamoDB offline). `AGENT_URL` is read at runtime in `play/page.tsx` (server component, `export const dynamic = "force-dynamic"`) and passed to `AgentWidget` as the `agentUrl` prop — deliberately **not** a `NEXT_PUBLIC_*` var, which would be build-time inlined.
+- `src/app/play/page.tsx` renders `AgentWidget`. The widget POSTs to the Lambda Function URL and renders the streamed **NDJSON** `AgentEvent` lines as a terminal-style trace timeline.
+- The Lambda (`infra/packages/functions/src/agent.ts`) makes a single bounded Groq completion (`MAX_OUTPUT_TOKENS=512`, `PROMPT_MAX_CHARS=500`, `temperature: 0`, 30s timeout, retry-once on `tool_use_failed`). No tools — the bio facts live in the system prompt (`infra/packages/shared/src/bio.ts`). Two modes via a `mode` body field: `chat` (stateful, history in DynamoDB) and `pitch` (stateless one-shot "Why hire me?").
+- On any Lambda error/timeout, or when `AGENT_URL` is unset / `NEXT_PUBLIC_AGENT_MODE=mock`, the frontend falls back to a **bilingual, intent-routed, fact-grounded** offline mock (`src/components/play/MockAgent.ts`) and shows a "mock mode" badge. It detects CZ/EN from the prompt, routes to a hand-written answer by intent (hire / weakness / experience / skills / projects / languages / roast / default), and emits a `reasoning` flavor line then a `done`. It is stateless. `AGENT_URL` is read at runtime in `play/page.tsx` (server component, `export const dynamic = "force-dynamic"`) and passed to `AgentWidget` as the `agentUrl` prop — deliberately **not** a `NEXT_PUBLIC_*` var, which would be build-time inlined.
 - The Next.js build is **decoupled** from `infra/`: the root `tsconfig.json` excludes `infra`, and the only coupling is the `AGENT_URL` runtime env var.
 
 ### Key files

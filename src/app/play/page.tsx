@@ -3,9 +3,9 @@ import Image from "next/image";
 import { AgentWidget } from "@/components/play/AgentWidget";
 
 export const metadata: Metadata = {
-  title: "Ask the Agent — Serverless Forex Demo",
+  title: "Ask the Agent — About Mario",
   description:
-    "A live serverless AI agent: type a Forex instruction and watch a bounded Groq Llama tool-calling loop run on AWS Lambda, streaming its reasoning and tool calls.",
+    "A live serverless AI agent that answers questions about Mario — self-deprecating, funny, and grounded in his real resume. Runs on AWS Lambda (Groq Llama 3.3 70B) with a polished offline fallback.",
 };
 
 // Read the Lambda URL from the runtime environment on every request rather than
@@ -21,8 +21,10 @@ export default function PlayPage() {
     <div className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="mb-2 text-3xl font-bold text-brand-900 dark:text-brand-100">Ask the Agent</h1>
       <p className="mb-6 text-sm text-brand-600 dark:text-brand-400">
-        Type a Forex instruction. It runs a bounded tool-calling agent loop on AWS Lambda (Groq
-        Llama 3.3 70B) over mock Forex tools — no real trading. Watch the live trace below.
+        Ask the agent anything about Mario — &ldquo;Why should we hire you?&rdquo;, &ldquo;What&apos;s
+        your biggest weakness?&rdquo;. It answers in a self-deprecating, funny way, grounded in real
+        resume facts, streaming live from AWS Lambda. Or hit &ldquo;Why hire me?&rdquo; for an instant
+        pitch.
       </p>
       <AgentWidget agentUrl={agentUrl} />
 

@@ -8,11 +8,9 @@ import {
 } from "../src/session-store";
 
 describe("seedSessionState", () => {
-  it("produces 2 demo positions with orderIds and empty history", () => {
+  it("produces an empty conversation history", () => {
     const s = seedSessionState();
-    expect(s.positions).toHaveLength(2);
     expect(s.history).toEqual([]);
-    for (const p of s.positions) expect(typeof p.orderId).toBe("string");
   });
 });
 
@@ -21,20 +19,17 @@ describe("DynamoSessionStore", () => {
     const client: DocClientLike = { send: vi.fn(async () => ({})) };
     const store = new DynamoSessionStore(client, "T");
     const state = await store.load("missing");
-    expect(state.positions).toHaveLength(2); // seeded
+    expect(state.history).toEqual([]); // seeded = empty history
   });
 
-  it("load returns the stored positions/history when present", async () => {
-    const stored = seedSessionState();
-    stored.history = [{ role: "user", content: "hi" }];
+  it("load returns the stored history when present", async () => {
     const client: DocClientLike = {
       send: vi.fn(async () => ({
-        Item: { sessionId: "x", positions: stored.positions, history: stored.history },
+        Item: { sessionId: "x", history: [{ role: "user", content: "hi" }] },
       })),
     };
     const store = new DynamoSessionStore(client, "T");
     const state = await store.load("x");
-    expect(state.positions).toHaveLength(2);
     expect(state.history).toEqual([{ role: "user", content: "hi" }]);
   });
 
@@ -51,7 +46,7 @@ describe("DynamoSessionStore", () => {
       role: i % 2 === 0 ? "user" : ("assistant" as "user" | "assistant"),
       content: `m${i}`,
     }));
-    await store.save("x", { positions: [], history });
+    await store.save("x", { history });
     // Inspect the PutCommand input the store sent.
     const put = sends[0] as { input: { Item: { history: HistoryMessage[]; expiresAt: number } } };
     expect(put.input.Item.history).toHaveLength(8);
@@ -68,7 +63,7 @@ describe("InMemorySessionStore", () => {
       role: "user" as const,
       content: `h${i}`,
     }));
-    await store.save("s", { positions: [], history });
+    await store.save("s", { history });
     const loaded = await store.load("s");
     expect(loaded.history).toHaveLength(8);
   });

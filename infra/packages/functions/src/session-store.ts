@@ -1,5 +1,5 @@
-// Session store for the Ask-the-Agent demo: persists open Forex positions +
-// a capped conversation history, keyed by a client-generated sessionId.
+// Session store for the Ask-the-Agent demo: persists a capped conversation
+// history, keyed by a client-generated sessionId.
 //
 // Behind a small interface (SessionStore) so it is swappable (D8) and the agent
 // loop can be unit-tested with an in-memory fake — no AWS needed in tests.
@@ -9,19 +9,9 @@
 // context (no AWS env) does not throw. Mirrors the awslambda guard in agent.ts.
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
-import type { ForexPair } from "@shared/tool-defs";
 
 const HISTORY_CAP = 8; // keep only the last N text turns (D3)
 const TTL_SECONDS = 3600; // 1 hour auto-expiry (D1)
-
-export interface Position {
-  orderId: string;
-  pair: ForexPair;
-  direction: "long" | "short";
-  lots: number;
-  entryPrice: number;
-  openedAt: string; // ISO
-}
 
 // History persisted as plain text turns only (no tool_calls / tool messages) so
 // the Groq request stays valid after capping — no orphaned tool messages.
@@ -31,7 +21,6 @@ export interface HistoryMessage {
 }
 
 export interface SessionState {
-  positions: Position[];
   history: HistoryMessage[];
 }
 
@@ -40,41 +29,9 @@ export interface SessionStore {
   save(sessionId: string, state: SessionState): Promise<void>;
 }
 
-function randomOrderId(): string {
-  let out = "ord_";
-  for (let i = 0; i < 4; i++) {
-    out += Math.floor(Math.random() * 256)
-      .toString(16)
-      .padStart(2, "0");
-  }
-  return out;
-}
-
-// A brand-new session gets two demo positions so the page looks alive and
-// "close all" / "my positions" have something to act on out of the box (D5).
+// A brand-new session starts with empty conversation history.
 export function seedSessionState(): SessionState {
-  const now = new Date().toISOString();
-  return {
-    positions: [
-      {
-        orderId: randomOrderId(),
-        pair: "EUR/USD",
-        direction: "long",
-        lots: 0.1,
-        entryPrice: 1.085,
-        openedAt: now,
-      },
-      {
-        orderId: randomOrderId(),
-        pair: "USD/JPY",
-        direction: "short",
-        lots: 0.3,
-        entryPrice: 149.5,
-        openedAt: now,
-      },
-    ],
-    history: [],
-  };
+  return { history: [] };
 }
 
 function capHistory(history: HistoryMessage[]): HistoryMessage[] {
@@ -88,7 +45,7 @@ export class InMemorySessionStore implements SessionStore {
     return this.map.get(sessionId) ?? seedSessionState();
   }
   async save(sessionId: string, state: SessionState): Promise<void> {
-    this.map.set(sessionId, { positions: state.positions, history: capHistory(state.history) });
+    this.map.set(sessionId, { history: capHistory(state.history) });
   }
 }
 
@@ -109,13 +66,10 @@ export class DynamoSessionStore implements SessionStore {
       new GetCommand({ TableName: this.tableName, Key: { sessionId } }),
     );
     const item = res.Item;
-    if (!item || !Array.isArray(item.positions)) {
+    if (!item || !Array.isArray(item.history)) {
       return seedSessionState();
     }
-    return {
-      positions: item.positions as Position[],
-      history: Array.isArray(item.history) ? (item.history as HistoryMessage[]) : [],
-    };
+    return { history: item.history as HistoryMessage[] };
   }
 
   async save(sessionId: string, state: SessionState): Promise<void> {
@@ -125,7 +79,6 @@ export class DynamoSessionStore implements SessionStore {
         TableName: this.tableName,
         Item: {
           sessionId,
-          positions: state.positions,
           history: capHistory(state.history),
           expiresAt,
         },
