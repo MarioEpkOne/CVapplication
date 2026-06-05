@@ -1,5 +1,10 @@
-<!-- last-commit: fe388ff77ac1465477065f228f38b2f024691440 -->
+<!-- last-commit: 68247018b893f9c1081d64893548faa85786f083 -->
 # Patch Notes
+
+## v0.12.0 — 2026-06-05
+
+### handoff-fidelity fixes — dev CSP eval, chrome bar, brand icons
+Brought the app into closer alignment with the approved design handoff and fixed a dev-only error. Resolved the Next.js `eval()` Content-Security-Policy error in development by extracting the CSP into `src/lib/csp.ts` and allowing `'unsafe-eval'` **only when `NODE_ENV` is not production** — the production policy stays strict (verified at runtime). Replaced the generic lucide `GitBranch`/`Link2` social stand-ins with real inline GitHub and LinkedIn brand SVGs (new `BrandIcons` module) across the hero, the print masthead, and the on-screen "Get in touch" list. Polished the top navigation to match the prototype (soft-shadow active pill, translucent hover, rounder corners, stronger blur) and unified the tabs with the locale + theme toggles into one cohesive chrome bar. Also fixed the Play-page trace console background from the old purple-black `#0f0a1a` to the new dark `#07141b`, and localized the footer (CZ/EN) via a new `SiteFooter` client component. No new dependencies.
 
 ## v0.11.0 — 2026-06-05
 
