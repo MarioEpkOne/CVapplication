@@ -1,5 +1,13 @@
-<!-- last-commit: e6af3186d4c882b8d3d195f4bc22a05921ea8cc1 -->
+<!-- last-commit: fe388ff77ac1465477065f228f38b2f024691440 -->
 # Patch Notes
+
+## v0.11.0 — 2026-06-05
+
+### route pipeline learnings to project KB
+Added project-specific pipeline guidance to the local knowledge base (`.claude/pipeline-kb/planner.md` and `implementer.md`), capturing the doc-count/stale-fact and non-ASCII-glyph learnings as project KB rather than generic plugin learnings. Affects pipeline runs only — no application code change.
+
+### cyan reskin + animated landing hero
+Restyled the entire app from purple to a white/cyan theme (deep teal-navy dark mode) by swapping the `brand-*` design tokens in `globals.css`, which recolors all three routes, the OG image, and every component at once. Added a full-bleed animated landing hero on the home page — portrait with grayscale→colour hover, clip-path reveal, mouse-tilt parallax, staggered text, and magnetic CTAs — backed by a new `hero/` module (`useTilt`, `MagneticButton`, `Hero.module.css`). Swapped in a professional headshot (`portrait.png`) as the main photo and moved the satirical "Make AI Great Again" portrait to the Play page as a wink. All hero chrome is fully localized via `labels.ts` (CZ/EN), the hero is hidden in print in favor of a clean masthead, and all motion is gated on reduced-motion.
 
 ## v0.10.0 — 2026-06-04
 
