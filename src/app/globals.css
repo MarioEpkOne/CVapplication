@@ -3,22 +3,22 @@
 /* Dark mode via next-themes attribute="class" — Tailwind v4 CSS-first */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ─── Brand tokens ─── */
+/* ─── Brand tokens (white / cyan) ─── */
 @theme {
   /* Light background — first impression */
-  --color-brand-bg: #f5ecff;
+  --color-brand-bg: #ffffff;
 
-  /* Purple accent scale */
-  --color-brand-50:  #faf5ff;
-  --color-brand-100: #f3e8ff;
-  --color-brand-200: #e9d5ff;
-  --color-brand-300: #d8b4fe;
-  --color-brand-400: #c084fc;
-  --color-brand-500: #a855f7;
-  --color-brand-600: #9333ea;
-  --color-brand-700: #7c3aed;
-  --color-brand-800: #6b21a8;
-  --color-brand-900: #581c87;
+  /* Cyan accent scale */
+  --color-brand-50:  #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #06b6d4;
+  --color-brand-600: #0891b2;
+  --color-brand-700: #0e7490;
+  --color-brand-800: #155e75;
+  --color-brand-900: #164e63;
 
   /* Font tokens */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -28,14 +28,14 @@
 @layer base {
   body {
     background: var(--color-brand-bg);
-    color: #1a1a1a;
+    color: #0b1620;
     font-family: var(--font-sans);
   }
 
-  /* Dark mode body overrides */
+  /* Dark mode body overrides — deep teal-navy */
   .dark body {
-    background: #0f0a1a;
-    color: #f0e8ff;
+    background: #07141b;
+    color: #e8fbff;
   }
 }
 

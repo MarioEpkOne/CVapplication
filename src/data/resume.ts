@@ -6,7 +6,7 @@ export const resumeCs: ResumeData = {
   header: {
     name: "Mario Alina",
     title: "Backend & AI Agentic Developer",
-    photoSrc: "/ai-photo.jpg",
+    photoSrc: "/portrait.png",
     location: "Brno, Česká republika",
     contacts: [
       {
@@ -162,7 +162,7 @@ export const resumeEn: ResumeData = {
   header: {
     name: "Mario Alina",
     title: "Backend Engineer & AI Agent Orchestrator",
-    photoSrc: "/ai-photo.jpg",
+    photoSrc: "/portrait.png",
     location: "Brno, Czech Republic",
     contacts: [
       {

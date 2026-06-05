@@ -13,9 +13,10 @@ const iconMap: Record<string, React.ElementType> = {
 interface ResumeHeaderProps {
   header: ResumeHeaderData;
   getInTouchLabel: string;
+  printMode?: boolean;
 }
 
-export function ResumeHeader({ header, getInTouchLabel }: ResumeHeaderProps) {
+export function ResumeHeader({ header, getInTouchLabel, printMode = false }: ResumeHeaderProps) {
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-start">
       {/* Photo (circular) */}
@@ -52,21 +53,25 @@ export function ResumeHeader({ header, getInTouchLabel }: ResumeHeaderProps) {
               </li>
             );
           })}
-          <li className="no-print">
-            <a
-              href="#contact"
-              className="flex items-center gap-1 text-sm font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
-            >
-              <MessageCircle size={12} aria-hidden />
-              {getInTouchLabel}
-            </a>
-          </li>
+          {!printMode && (
+            <li className="no-print">
+              <a
+                href="#contact"
+                className="flex items-center gap-1 text-sm font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+              >
+                <MessageCircle size={12} aria-hidden />
+                {getInTouchLabel}
+              </a>
+            </li>
+          )}
         </ul>
 
         {/* Print / PDF button — client component, hidden in print */}
-        <div className="no-print">
-          <PrintButton />
-        </div>
+        {!printMode && (
+          <div className="no-print">
+            <PrintButton />
+          </div>
+        )}
       </div>
     </header>
   );

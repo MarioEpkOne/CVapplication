@@ -18,6 +18,11 @@ export const labels = {
     comingSoon: "Již brzy",
     getInTouch: "Napište mi",
     askTheAgent: "Zeptej se agenta",
+    available: "K dispozici",
+    viewResume: "Zobrazit životopis",
+    downloadPdf: "Stáhnout PDF",
+    openToRoles: "Otevřen nabídkám",
+    connect: "Spojme se",
   },
   en: {
     experience: "Experience",
@@ -38,6 +43,11 @@ export const labels = {
     comingSoon: "Coming soon.",
     getInTouch: "Get in Touch",
     askTheAgent: "Ask the Agent",
+    available: "Available for work",
+    viewResume: "View résumé",
+    downloadPdf: "Download PDF",
+    openToRoles: "Open to roles",
+    connect: "Connect",
   },
 } as const;
 

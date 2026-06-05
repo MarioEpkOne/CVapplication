@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { AgentWidget } from "@/components/play/AgentWidget";
 
 export const metadata: Metadata = {
@@ -24,6 +25,20 @@ export default function PlayPage() {
         Llama 3.3 70B) over mock Forex tools — no real trading. Watch the live trace below.
       </p>
       <AgentWidget agentUrl={agentUrl} />
+
+      {/* Off-duty: the original "campaign" portrait lives here as a wink. */}
+      <figure className="no-print mt-16 flex flex-col items-center gap-3 border-t border-brand-200 pt-10 dark:border-brand-800">
+        <Image
+          src="/ai-photo.jpg"
+          alt="Make AI Great Again — campaign portrait, very serious"
+          width={260}
+          height={198}
+          className="rounded-2xl border border-brand-200 shadow-lg grayscale transition duration-500 hover:grayscale-0 dark:border-slate-700"
+        />
+        <figcaption className="text-center text-xs text-slate-500 dark:text-slate-400">
+          Off the clock, running on a single-issue platform: making AI great again.
+        </figcaption>
+      </figure>
     </div>
   );
 }

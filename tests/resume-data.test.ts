@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { resumeCs, resumeEn } from "@/data/resume";
 import type { ResumeData } from "@/data/resume.types";
+import { labels } from "@/lib/labels";
 
 const locales: Array<[string, ResumeData]> = [
   ["cs", resumeCs],
@@ -20,6 +21,10 @@ describe("resume data integrity", () => {
         expect(contact.label).toBeTruthy();
         expect(contact.href).toBeTruthy();
       }
+    });
+
+    it("uses the portrait.png headshot", () => {
+      expect(resume.header.photoSrc).toBe("/portrait.png");
     });
 
     it("exposes no email contact and includes github + linkedin (form removed)", () => {
@@ -94,5 +99,13 @@ describe("resume data integrity", () => {
         expect(cert.name).toBeTruthy();
       }
     });
+  });
+});
+
+describe("hero label keys (D1 bilingual parity)", () => {
+  const heroKeys = ["available", "viewResume", "downloadPdf", "openToRoles", "connect"] as const;
+  it.each(heroKeys)("key '%s' exists and is non-empty in both locales", (key) => {
+    expect(labels.cs[key]).toBeTruthy();
+    expect(labels.en[key]).toBeTruthy();
   });
 });

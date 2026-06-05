@@ -1,0 +1,126 @@
+/* Hero.module.css — visuals for the landing hero (Spotlight Split).
+   Layout is handled with Tailwind utilities in Hero.tsx; this module owns the
+   effects that are awkward in utilities: portrait frame/grayscale/overlay,
+   animated background graphics, floating badges. Colors come from the global
+   brand tokens (set in globals.css @theme), so light/dark follow automatically.
+   Entrance/stagger/tilt/magnetic are driven by Motion in the TSX. */
+
+.stage {
+  --accent: var(--color-brand-600);
+  --accent-strong: var(--color-brand-700);
+  --ink: #0b1620;
+  --ink-soft: #45576a;
+  --ink-faint: #7d92a3;
+  --line: #dceef2;
+  --elev: #ffffff;
+  --grid-line: rgba(8, 145, 178, 0.10);
+  --blob-a: #67e8f9;
+  --blob-b: #22d3ee;
+  --shadow-card: 0 24px 60px -24px rgba(8, 51, 68, 0.30), 0 8px 24px -12px rgba(8, 51, 68, 0.18);
+
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: clamp(540px, 76vh, 820px);
+}
+:global(.dark) .stage {
+  --accent: var(--color-brand-400);
+  --accent-strong: var(--color-brand-300);
+  --ink: #e8fbff;
+  --ink-soft: #a8c6d2;
+  --ink-faint: #6f93a1;
+  --line: #18313d;
+  --elev: #0f2430;
+  --grid-line: rgba(34, 211, 238, 0.10);
+  --blob-a: #0e7490;
+  --blob-b: #155e75;
+  --shadow-card: 0 30px 80px -28px rgba(0, 0, 0, 0.7), 0 8px 30px -14px rgba(6, 182, 212, 0.35);
+}
+
+/* ── Background graphics ── */
+.bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.grid::before {
+  content: "";
+  position: absolute; inset: -2px;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(120% 120% at 72% 38%, #000 30%, transparent 78%);
+  mask-image: radial-gradient(120% 120% at 72% 38%, #000 30%, transparent 78%);
+  animation: gridpan 40s linear infinite;
+}
+@keyframes gridpan { from { background-position: 0 0; } to { background-position: 44px 44px; } }
+
+.blob { position: absolute; border-radius: 50%; filter: blur(64px); opacity: 0.5; will-change: transform; }
+:global(.dark) .blob { opacity: 0.4; }
+.blobA {
+  width: 46vw; height: 46vw; max-width: 600px; max-height: 600px; top: -12%; left: -8%;
+  background: radial-gradient(circle at 30% 30%, var(--blob-a), transparent 70%);
+  animation: drift1 18s ease-in-out infinite;
+}
+.blobB {
+  width: 40vw; height: 40vw; max-width: 520px; max-height: 520px; bottom: -16%; right: -6%;
+  background: radial-gradient(circle at 60% 40%, var(--blob-b), transparent 70%);
+  animation: drift2 22s ease-in-out infinite;
+}
+@keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(6%,8%) scale(1.12);} }
+@keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-7%,-6%) scale(1.08);} }
+
+/* ── Portrait ── */
+.portrait { position: relative; width: min(100%, 440px); justify-self: center; perspective: 1100px; }
+.tilt { position: relative; transform-style: preserve-3d; }
+.ring {
+  position: absolute; inset: -14px; border-radius: 38px; z-index: -1;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--accent) 45%, transparent), transparent 60%);
+}
+.imgWrap {
+  position: relative; overflow: hidden; border-radius: 28px; aspect-ratio: 4 / 5;
+  background: var(--elev); box-shadow: var(--shadow-card);
+}
+.imgWrap :global(img) {
+  display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%;
+  filter: grayscale(0.92) contrast(1.02); transform: scale(1.04);
+  transition: filter 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.portrait:hover .imgWrap :global(img) {
+  filter: grayscale(0) contrast(1.03) saturate(1.05); transform: scale(1.08);
+}
+.imgWrap::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0.45;
+  background:
+    radial-gradient(120% 80% at 50% 0%, transparent 58%, color-mix(in srgb, var(--color-brand-900) 30%, transparent) 100%),
+    linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--color-brand-800) 20%, transparent));
+}
+:global(.dark) .imgWrap::after { mix-blend-mode: screen; opacity: 0.3; }
+
+/* ── Floating badges + accent dots ── */
+.badge {
+  position: absolute; z-index: 4; transform: translateZ(80px);
+  display: inline-flex; align-items: center; gap: 9px; padding: 10px 14px; border-radius: 14px;
+  background: color-mix(in srgb, var(--elev) 92%, transparent); border: 1px solid var(--line);
+  box-shadow: var(--shadow-card); font-size: 13px; font-weight: 600; color: var(--ink);
+  backdrop-filter: blur(6px);
+}
+.badge svg { width: 16px; height: 16px; color: var(--accent); }
+.badgeMuted { color: var(--ink-faint); font-weight: 500; }
+.bob { animation: bob 5.5s ease-in-out infinite; }
+.bobDelay { animation: bob 5.5s ease-in-out infinite; animation-delay: -2.6s; }
+@keyframes bob { 0%,100%{transform:translateZ(80px) translateY(0);} 50%{transform:translateZ(80px) translateY(-9px);} }
+
+.statusDot {
+  width: 9px; height: 9px; border-radius: 50%; background: #22c55e;
+  animation: pulse 2.4s ease-out infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }
+  70% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+.accentDot { position: absolute; border-radius: 50%; z-index: 4; transform: translateZ(60px); }
+.accentRing { background: transparent; border: 3px solid currentColor; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blobA, .blobB, .grid::before, .bob, .bobDelay, .statusDot { animation: none !important; }
+  .imgWrap :global(img) { transition: none !important; }
+}

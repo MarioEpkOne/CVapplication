@@ -18,7 +18,7 @@ export default function OGImage() {
           flexDirection: "column",
           alignItems: "flex-start",
           justifyContent: "flex-end",
-          background: "linear-gradient(135deg, #f5ecff 0%, #e9d5ff 60%, #a855f7 100%)",
+          background: "linear-gradient(135deg, #ecfeff 0%, #a5f3fc 58%, #06b6d4 100%)",
           padding: "64px 72px",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
         }}
@@ -26,7 +26,7 @@ export default function OGImage() {
         {/* Badge */}
         <div
           style={{
-            background: "#a855f7",
+            background: "#0891b2",
             color: "white",
             borderRadius: "24px",
             padding: "6px 18px",
@@ -45,7 +45,7 @@ export default function OGImage() {
           style={{
             fontSize: "72px",
             fontWeight: 900,
-            color: "#3b0764",
+            color: "#0b1620",
             lineHeight: 1.05,
             marginBottom: "16px",
           }}
@@ -57,7 +57,7 @@ export default function OGImage() {
         <div
           style={{
             fontSize: "28px",
-            color: "#6b21a8",
+            color: "#155e75",
             fontWeight: 500,
           }}
         >
