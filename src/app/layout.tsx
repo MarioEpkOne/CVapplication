@@ -4,8 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { TRPCProvider } from "@/lib/trpc/Provider";
 import { LocaleProvider } from "@/lib/locale";
 import { TabBar } from "@/components/TabBar";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LocaleToggle } from "@/components/LocaleToggle";
+import { SiteFooter } from "@/components/SiteFooter";
 import { AnalyticsPing } from "@/components/AnalyticsPing";
 import "./globals.css";
 
@@ -40,27 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LocaleProvider>
             <TRPCProvider>
               <div className="flex min-h-screen flex-col">
-                <header className="flex items-center justify-between pr-4">
-                  <TabBar />
-                  <div className="no-print flex items-center gap-1 flex-shrink-0">
-                    <LocaleToggle />
-                    <ThemeToggle />
-                  </div>
-                </header>
+                <TabBar />
                 <main className="flex-1">{children}</main>
-                <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
-                  <p>
-                    Built by Mario Alina.{" "}
-                    <a
-                      href="https://github.com/MarioEpkOne/CVapplication"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline hover:text-brand-700"
-                    >
-                      View source
-                    </a>
-                  </p>
-                </footer>
+                <SiteFooter />
                 <AnalyticsPing />
               </div>
             </TRPCProvider>

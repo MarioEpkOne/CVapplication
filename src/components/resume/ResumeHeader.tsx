@@ -1,12 +1,13 @@
 import { Avatar } from "./Avatar";
 import { PrintButton } from "./PrintButton";
 import type { ResumeHeader as ResumeHeaderData } from "@/data/resume.types";
-import { Mail, GitBranch, Link2, Globe, MapPin, MessageCircle } from "lucide-react";
+import { Mail, Globe, MapPin, MessageCircle } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/icons/BrandIcons";
 
 const iconMap: Record<string, React.ElementType> = {
   email: Mail,
-  github: GitBranch,
-  linkedin: Link2,
+  github: GithubIcon,
+  linkedin: LinkedinIcon,
   website: Globe,
 };
 

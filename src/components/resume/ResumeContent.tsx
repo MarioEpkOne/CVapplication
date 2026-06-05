@@ -3,6 +3,8 @@
 import { useLocale } from "@/lib/locale";
 import { resumes } from "@/data/resume";
 import { labels } from "@/lib/labels";
+import { GithubIcon, LinkedinIcon } from "@/components/icons/BrandIcons";
+import { Globe } from "lucide-react";
 import { Hero } from "@/components/resume/Hero";
 import { ResumeHeader } from "@/components/resume/ResumeHeader";
 import { ProfileSummary } from "@/components/resume/ProfileSummary";
@@ -90,18 +92,23 @@ export function ResumeContent() {
           <ul className="flex flex-wrap gap-x-4 gap-y-1">
             {data.header.contacts
               .filter((c) => c.kind !== "email")
-              .map((c) => (
-                <li key={c.href}>
-                  <a
-                    href={c.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
-                  >
-                    {c.label}
-                  </a>
-                </li>
-              ))}
+              .map((c) => {
+                const Icon =
+                  c.kind === "github" ? GithubIcon : c.kind === "linkedin" ? LinkedinIcon : Globe;
+                return (
+                  <li key={c.href}>
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-sm text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                    >
+                      <Icon size={15} aria-hidden />
+                      {c.label}
+                    </a>
+                  </li>
+                );
+              })}
           </ul>
         </section>
       </div>

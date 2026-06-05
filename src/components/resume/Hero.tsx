@@ -2,15 +2,16 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { ArrowDown, Download, Mail, MapPin, GitBranch, Link2 } from "lucide-react";
+import { ArrowDown, Download, Mail, MapPin } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/icons/BrandIcons";
 import type { ResumeHeader } from "@/data/resume.types";
 import { useTilt } from "./hero/useTilt";
 import { MagneticButton } from "./hero/MagneticButton";
 import styles from "./hero/Hero.module.css";
 
 const socialIcon: Record<string, React.ElementType> = {
-  github: GitBranch,
-  linkedin: Link2,
+  github: GithubIcon,
+  linkedin: LinkedinIcon,
 };
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
@@ -148,7 +149,7 @@ export function Hero({
             </span>
             <div className="flex gap-2">
               {socials.map((s) => {
-                const Icon = socialIcon[s.kind] ?? Link2;
+                const Icon = socialIcon[s.kind] ?? GithubIcon;
                 return (
                   <a
                     key={s.href}

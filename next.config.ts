@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import { buildCsp } from "./src/lib/csp";
+
+const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -20,18 +23,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self' data:",
-              "connect-src 'self' https://*.lambda-url.eu-central-1.on.aws",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "object-src 'none'",
-            ].join("; "),
+            value: buildCsp(isDev),
           },
         ],
       },
