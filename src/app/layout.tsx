@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TRPCProvider } from "@/lib/trpc/Provider";
@@ -31,6 +31,17 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Intentionally NOT disabling zoom (no maximumScale/userScalable) — WCAG 1.4.4/1.4.10.
+  viewportFit: "cover", // required for env(safe-area-inset-*) to be non-zero
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#07141b" },
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="cs" suppressHydrationWarning className={inter.variable}>
@@ -38,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem storageKey="theme">
           <LocaleProvider>
             <TRPCProvider>
-              <div className="flex min-h-screen flex-col">
+              <div className="flex min-h-dvh flex-col">
                 <TabBar />
                 <main className="flex-1">{children}</main>
                 <SiteFooter />

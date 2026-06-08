@@ -46,7 +46,7 @@ export function ResumeHeader({ header, getInTouchLabel, printMode = false }: Res
                   href={contact.href}
                   target={contact.kind !== "email" ? "_blank" : undefined}
                   rel={contact.kind !== "email" ? "noopener noreferrer" : undefined}
-                  className="flex items-center gap-1 text-sm text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                  className="flex min-h-9 items-center gap-1 py-1 text-sm text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
                 >
                   <Icon size={12} aria-hidden />
                   {contact.label}
@@ -58,7 +58,7 @@ export function ResumeHeader({ header, getInTouchLabel, printMode = false }: Res
             <li className="no-print">
               <a
                 href="#contact"
-                className="flex items-center gap-1 text-sm font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
+                className="flex min-h-9 items-center gap-1 py-1 text-sm font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
               >
                 <MessageCircle size={12} aria-hidden />
                 {getInTouchLabel}

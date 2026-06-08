@@ -21,7 +21,7 @@ export function TabBar() {
 
   return (
     <nav
-      className="no-print sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-brand-200 bg-brand-bg/80 px-4 py-2.5 backdrop-blur-md dark:border-brand-800 dark:bg-brand-900/80"
+      className="no-print sticky top-0 z-50 flex items-center justify-between gap-2 border-b border-brand-200 bg-brand-bg/80 px-2 py-2.5 backdrop-blur-md pt-safe px-safe sm:gap-3 sm:px-4 dark:border-brand-800 dark:bg-brand-900/80"
       aria-label="Main navigation"
     >
       {/* Left group — tabs */}
@@ -33,10 +33,10 @@ export function TabBar() {
               key={href}
               href={href}
               className={cn(
-                "whitespace-nowrap rounded-[9px] px-4 py-[7px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
+                "inline-flex min-h-11 items-center whitespace-nowrap rounded-[9px] px-2.5 py-[7px] text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 sm:px-4",
                 isActive
                   ? "bg-brand-600 text-white shadow-[0_12px_30px_-18px_rgba(8,51,68,0.14)] dark:shadow-[0_16px_40px_-22px_rgba(0,0,0,0.5)]"
-                  : "text-brand-700 hover:bg-brand-500/10 hover:text-brand-900 dark:text-brand-300 dark:hover:text-white"
+                  : "text-brand-700 hover:bg-brand-500/10 hover:text-brand-900 dark:text-brand-300 dark:hover:text-white",
               )}
               aria-current={isActive ? "page" : undefined}
             >

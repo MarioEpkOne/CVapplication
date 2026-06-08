@@ -22,7 +22,7 @@ export function ExperienceTimeline({ experience, heading }: ExperienceTimelinePr
       </h2>
       <ol className="relative border-l-2 border-brand-200 dark:border-brand-700">
         {experience.map((entry, i) => (
-          <li key={`${entry.company}-${i}`} className="mb-8 ml-6">
+          <li key={`${entry.company}-${i}`} className="mb-8 ml-4 sm:ml-6">
             {/* Timeline dot */}
             <span className="absolute -left-[9px] mt-1.5 h-4 w-4 rounded-full border-2 border-brand-400 bg-brand-bg dark:border-brand-500 dark:bg-brand-900" />
 
@@ -30,9 +30,7 @@ export function ExperienceTimeline({ experience, heading }: ExperienceTimelinePr
               <div>
                 {/* Role + company */}
                 <div className="flex flex-wrap items-baseline gap-x-2">
-                  <h3 className="font-semibold text-brand-900 dark:text-brand-100">
-                    {entry.role}
-                  </h3>
+                  <h3 className="font-semibold text-brand-900 dark:text-brand-100">{entry.role}</h3>
                   <span className="text-brand-600 dark:text-brand-400">@ {entry.company}</span>
                 </div>
 

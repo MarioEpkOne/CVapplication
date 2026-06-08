@@ -21,8 +21,8 @@ export function Scrollytelling({ sections }: ScrollytellingProps) {
 
           {/* Heading */}
           <h2
-            className={`mb-4 font-bold leading-tight text-brand-900 dark:text-brand-100 ${
-              i === 0 ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl"
+            className={`mb-4 font-bold leading-tight text-balance text-brand-900 dark:text-brand-100 ${
+              i === 0 ? "text-fluid-h1" : "text-fluid-h2"
             }`}
           >
             {section.heading}
@@ -31,10 +31,7 @@ export function Scrollytelling({ sections }: ScrollytellingProps) {
           {/* Body paragraphs — content only from data (Constraint) */}
           <div className="space-y-3">
             {section.body.map((paragraph, pi) => (
-              <p
-                key={pi}
-                className="text-base leading-relaxed text-brand-700 dark:text-brand-300"
-              >
+              <p key={pi} className="text-base leading-relaxed text-brand-700 dark:text-brand-300">
                 {paragraph}
               </p>
             ))}

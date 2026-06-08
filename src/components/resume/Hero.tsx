@@ -59,9 +59,7 @@ export function Hero({
   const reduce = useReducedMotion();
   const tilt = useTilt(9);
   const nameWords = header.name.split(" ");
-  const socials = header.contacts.filter(
-    (c) => c.kind === "github" || c.kind === "linkedin",
-  );
+  const socials = header.contacts.filter((c) => c.kind === "github" || c.kind === "linkedin");
   const [city, ...rest] = (header.location ?? "").split(",");
   const region = rest.join(",").trim();
 
@@ -157,7 +155,7 @@ export function Hero({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="grid h-10 w-10 place-items-center rounded-xl border border-brand-200 bg-white/60 text-slate-600 transition hover:-translate-y-0.5 hover:border-brand-500 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300"
+                    className="grid h-11 w-11 place-items-center rounded-xl border border-brand-200 bg-white/60 text-slate-600 transition hover:-translate-y-0.5 hover:border-brand-500 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300"
                   >
                     <Icon size={18} />
                   </a>
@@ -174,7 +172,7 @@ export function Hero({
             onPointerMove={tilt.onPointerMove}
             onPointerLeave={tilt.onPointerLeave}
             className={styles.tilt}
-            style={{ rotateX: tilt.rotateX, rotateY: tilt.rotateY }}
+            style={tilt.enabled ? { rotateX: tilt.rotateX, rotateY: tilt.rotateY } : undefined}
           >
             <span className={styles.ring} aria-hidden="true" />
             <motion.div className={styles.imgWrap} {...reveal}>

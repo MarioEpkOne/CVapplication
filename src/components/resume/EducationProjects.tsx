@@ -8,7 +8,12 @@ interface EducationProjectsProps {
   projectsHeading: string;
 }
 
-export function EducationProjects({ education, projects, educationHeading, projectsHeading }: EducationProjectsProps) {
+export function EducationProjects({
+  education,
+  projects,
+  educationHeading,
+  projectsHeading,
+}: EducationProjectsProps) {
   return (
     <div className="grid gap-8 sm:grid-cols-2">
       {/* Projects — gracefully omit if not provided */}
@@ -30,7 +35,7 @@ export function EducationProjects({ education, projects, educationHeading, proje
                       href={project.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-brand-500 hover:text-brand-700 dark:text-brand-400"
+                      className="-m-2 inline-flex h-9 w-9 items-center justify-center p-2 text-brand-500 hover:text-brand-700 dark:text-brand-400"
                       aria-label={`${project.name} — external link`}
                     >
                       <ExternalLink size={12} />

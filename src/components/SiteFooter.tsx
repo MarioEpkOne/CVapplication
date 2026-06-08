@@ -15,7 +15,7 @@ export function SiteFooter() {
           href="https://github.com/MarioEpkOne/CVapplication"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-brand-700"
+          className="inline-block py-1 underline hover:text-brand-700"
         >
           {l.viewSource}
         </a>

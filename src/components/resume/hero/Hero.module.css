@@ -83,8 +83,10 @@
   filter: grayscale(0.92) contrast(1.02); transform: scale(1.04);
   transition: filter 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.portrait:hover .imgWrap :global(img) {
-  filter: grayscale(0) contrast(1.03) saturate(1.05); transform: scale(1.08);
+@media (hover: hover) and (pointer: fine) {
+  .portrait:hover .imgWrap :global(img) {
+    filter: grayscale(0) contrast(1.03) saturate(1.05); transform: scale(1.08);
+  }
 }
 .imgWrap::after {
   content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply; opacity: 0.45;

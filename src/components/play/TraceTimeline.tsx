@@ -26,7 +26,7 @@ export function TraceTimeline({ events, mockMode }: TraceTimelineProps) {
     <div
       ref={scrollRef}
       className={cn(
-        "relative max-h-[28rem] min-h-[12rem] overflow-y-auto rounded-lg bg-[#07141b] p-4 font-mono text-xs leading-relaxed text-brand-100 shadow-inner ring-1 ring-brand-800",
+        "relative max-h-[28rem] min-h-[12rem] overflow-y-auto rounded-lg bg-[#07141b] p-4 font-mono text-xs leading-relaxed text-brand-100 shadow-inner ring-1 ring-brand-800 sm:max-h-[36rem]",
         mockMode && "ring-amber-400/40",
       )}
       aria-live="polite"

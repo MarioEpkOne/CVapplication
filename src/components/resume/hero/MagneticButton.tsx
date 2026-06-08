@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useInteractiveMotion } from "./useInteractiveMotion";
 
 interface MagneticButtonProps {
   children: React.ReactNode;
@@ -16,7 +17,9 @@ interface MagneticButtonProps {
 /**
  * A button/link with a subtle magnetic hover: the element eases toward the
  * cursor while hovered and springs back on leave. Renders an <a> when `href`
- * is provided, otherwise a <button>. Disabled under prefers-reduced-motion.
+ * is provided, otherwise a <button>. Disabled on touch / coarse-pointer devices
+ * and under prefers-reduced-motion (via `useInteractiveMotion`); `whileTap` still
+ * gives tap feedback everywhere.
  */
 export function MagneticButton({
   children,
@@ -27,7 +30,7 @@ export function MagneticButton({
   ...rest
 }: MagneticButtonProps) {
   const ref = useRef<HTMLElement>(null);
-  const reduce = useReducedMotion();
+  const enabled = useInteractiveMotion();
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -35,7 +38,7 @@ export function MagneticButton({
   const sy = useSpring(y, { stiffness: 200, damping: 15, mass: 0.3 });
 
   const handleMove = (e: React.PointerEvent) => {
-    if (reduce || !ref.current) return;
+    if (!enabled || !ref.current) return;
     const r = ref.current.getBoundingClientRect();
     x.set((e.clientX - (r.left + r.width / 2)) * strength);
     y.set((e.clientY - (r.top + r.height / 2)) * strength);
@@ -50,7 +53,8 @@ export function MagneticButton({
     className,
     onPointerMove: handleMove,
     onPointerLeave: handleLeave,
-    style: { x: sx, y: sy },
+    style: enabled ? { x: sx, y: sy } : undefined,
+    whileTap: { scale: 0.95 },
     ...rest,
   };
 

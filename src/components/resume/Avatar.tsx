@@ -25,8 +25,7 @@ export function Avatar({ src, name, size = 96 }: AvatarProps) {
     // Tasteful initials fallback — never breaks layout or PDF
     return (
       <div
-        style={{ width: size, height: size }}
-        className="flex items-center justify-center rounded-full bg-brand-300 text-brand-800 font-bold text-xl flex-shrink-0"
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-300 text-brand-800 font-bold text-xl flex-shrink-0 sm:h-24 sm:w-24"
         aria-label={`${name} avatar — initials`}
       >
         {initials}
@@ -40,7 +39,7 @@ export function Avatar({ src, name, size = 96 }: AvatarProps) {
       alt={`${name} photo`}
       width={size}
       height={size}
-      className="rounded-full object-cover flex-shrink-0"
+      className="h-16 w-16 rounded-full object-cover flex-shrink-0 sm:h-24 sm:w-24"
       onError={() => setError(true)}
       priority
     />
