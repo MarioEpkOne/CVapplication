@@ -49,22 +49,4 @@ npm run build                # Production build → .next/standalone
 
 Migration runs automatically on container start via `scripts/start.sh` → `scripts/migrate.mjs`.
 
----
-
-## AWS by default, runs on Fly
-
-The conventional default would be AWS. This app runs on Fly.io instead — intentionally, self-awarely, and with a [documented rationale](docs/adr/0001-fly-over-aws.md). The ADR argues the case: pick the tool that fits the workload, and be able to explain why.
-
----
-
-## Agent context
-
-This repo ships `CLAUDE.md` (Claude Code), `AGENTS.md` (cross-tool), and four ADRs as **first-class deliverables** — because context as infrastructure for AI agents is the discipline the role values.
-
-- [CLAUDE.md](CLAUDE.md) — Full architecture, commands, conventions, gotchas
-- [AGENTS.md](AGENTS.md) — Tool-agnostic agent guidance
-- [docs/adr/](docs/adr/) — Architecture Decision Records
-
----
-
 *Built by Mario Alina — June 2026*
