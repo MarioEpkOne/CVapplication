@@ -8,7 +8,7 @@ export function SiteFooter() {
   const l = labels[locale];
 
   return (
-    <footer className="no-print mt-8 border-t border-brand-200 py-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
+    <footer className="no-print mt-8 border-t border-brand-200 pt-4 pb-safe-or-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
       <p>
         {l.builtBy}{" "}
         <a
