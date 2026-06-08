@@ -11,6 +11,9 @@ export default $config({
   },
   async run() {
     const groqKey = new sst.Secret("GroqApiKey");
+    // Shared HMAC secret for the signed-request token. Must hold the SAME value
+    // as the Fly secret AGENT_SIGNING_SECRET (set via flyctl). Never NEXT_PUBLIC_*.
+    const signingSecret = new sst.Secret("AgentSigningSecret");
 
     // D16: production allows only the Fly domain; dev/staging also allows the
     // local dev origin so a browser pointed at a real Lambda URL is not CORS-blocked.
@@ -47,7 +50,7 @@ export default $config({
       // raise the "Concurrent executions" Service Quota (eu-central-1) to
       // >= 100 + N, then re-add `concurrency: { reserved: N }`. Never use
       // `reserved: 0` to "remove" it — that throttles the function to zero.
-      link: [groqKey, sessions],
+      link: [groqKey, signingSecret, sessions],
       environment: {
         GROQ_API_KEY: groqKey.value,
         ALLOWED_ORIGINS: origins.join(","),
@@ -55,6 +58,12 @@ export default $config({
         // dev/staging stays permissive so local curl and tests still work (D2/E2).
         REQUIRE_ORIGIN: $app.stage === "prod" ? "true" : "false",
         SESSIONS_TABLE: sessions.name,
+        // Signed-token gate: shared HMAC secret + prod-only enforcement flag.
+        AGENT_SIGNING_SECRET: signingSecret.value,
+        REQUIRE_SIGNED_TOKEN: $app.stage === "prod" ? "true" : "false",
+        // Two-axis daily budget cap (~15% under Groq free-tier 1000 RPD / 100k TPD).
+        REQUESTS_PER_DAY: "800",
+        TOKENS_PER_DAY: "85000",
       },
       url: {
         cors: {

@@ -150,8 +150,16 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 | `AGENT_URL` | Fly secret / `.env.local` | Lambda Function URL for the frontend, read at **runtime** by `play/page.tsx` (not `NEXT_PUBLIC_*` — that would be build-time inlined). Unset = offline mock mode. |
 | `NEXT_PUBLIC_AGENT_MODE` | `.env.local` (dev only) | Set to `mock` to force the offline mock agent |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | GitHub Actions secrets | SST deploy from CI |
+| `AGENT_SIGNING_SECRET` | Fly secret (Next) + SST Secret `AgentSigningSecret` (Lambda) | Shared HMAC key for the signed-request token. Both sides must hold the SAME value. Never `NEXT_PUBLIC_*`, never committed. |
 
-Reference `.env.example` for the Next.js/Fly env vars. **Never commit real values.** The Lambda's own vars (`GROQ_API_KEY`, `ALLOWED_ORIGINS`, `REQUIRE_ORIGIN`, `SESSIONS_TABLE`) are managed by SST in `infra/sst.config.ts`, not in `.env.example`.
+Reference `.env.example` for the Next.js/Fly env vars. **Never commit real values.** The Lambda's own vars (`GROQ_API_KEY`, `ALLOWED_ORIGINS`, `REQUIRE_ORIGIN`, `SESSIONS_TABLE`, `AGENT_SIGNING_SECRET`, `REQUIRE_SIGNED_TOKEN`, `REQUESTS_PER_DAY`, `TOKENS_PER_DAY`) are managed by SST in `infra/sst.config.ts`, not in `.env.example`.
+
+One-time deploy steps to activate the signed-token gate in production:
+```bash
+cd infra && npx sst secret set AgentSigningSecret <value> --stage prod
+flyctl secrets set AGENT_SIGNING_SECRET=<same value>
+```
+Both must hold the same secret; a mismatch causes all production requests to 403.
 
 ## Dev-environment tooling (WSL2)
 
@@ -183,6 +191,7 @@ Both are on `$PATH` via `~/.bashrc`. AWS credentials live in `~/.aws/credentials
 - **CORS `allowMethods` on a Lambda Function URL** rejects members longer than 6 chars, so `"OPTIONS"` (7) is invalid — and unnecessary, since the URL answers the preflight automatically. List only the real method(s), e.g. `["POST"]`.
 - **Reserved concurrency is intentionally NOT set on `AgentHandler`.** This AWS account's region-wide Lambda quota (`get-account-settings → AccountLimit.ConcurrentExecutions`) is **10** (new-account default). AWS enforces `UnreservedConcurrentExecutions = AccountLimit − Σ(reserved) ≥ 10`, so reserving *any* amount → `InvalidParameterValueException: ... decreases account's UnreservedConcurrentExecution below its minimum value of [10]` and the `sst deploy` fails. The 10-execution account ceiling already caps this function's total parallelism (excess invocations 429-throttle); per-IP abuse is bounded by the DynamoDB rate limiter (`rate-limit-store.ts`, 10 req/60s). To add an explicit per-function cap, first raise the "Concurrent executions" Service Quota in eu-central-1 to ≥ `100 + N`, then add `concurrency: { reserved: N }` in `sst.config.ts`. **Never set `reserved: 0`** to "disable" the cap — that throttles the function to zero (fully disabling it).
 - **`deploy.yml` runs on push to `main` and deploys BOTH targets**: `flyctl deploy --remote-only` (Fly app) and `npx sst deploy --stage prod` (Lambda). A push therefore redeploys the Lambda automatically — there is no push-without-Lambda-deploy path via CI. To deploy the Lambda out-of-band, run `cd infra && npx sst deploy --stage prod` locally.
+- **Signed agent token is stateless (no nonce store)**: a captured token can be replayed within its ~60s TTL. The two-axis daily budget cap (`REQUESTS_PER_DAY=800`, `TOKENS_PER_DAY=85000`) is the true cost backstop. Replay window is intentionally short; adding a nonce store would require a DynamoDB write on every request.
 
 ---
 

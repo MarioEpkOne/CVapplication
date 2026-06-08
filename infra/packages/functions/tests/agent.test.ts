@@ -48,6 +48,13 @@ function stopMessage(content: string) {
   return { choices: [{ message: { role: "assistant", content }, finish_reason: "stop" }] };
 }
 
+function stopMessageWithUsage(content: string, total: number) {
+  return {
+    choices: [{ message: { role: "assistant", content }, finish_reason: "stop" }],
+    usage: { total_tokens: total },
+  };
+}
+
 describe("runAgent", () => {
   it("chat mode terminates in one Groq call and emits done", async () => {
     const events: AgentEvent[] = [];
@@ -429,4 +436,45 @@ describe("runAgent", () => {
     }
     expect(allowed).toBe(true);
   });
+
+  it("runAgent returns tokensUsed from completion usage", async () => {
+    const events: AgentEvent[] = [];
+    const { groq } = makeGroq([stopMessageWithUsage("Answer.", 1234)]);
+    const result = await runAgent({
+      mode: "chat",
+      prompt: "hi",
+      origin: ALLOWED[0],
+      groq,
+      write: (e) => events.push(e),
+      allowedOrigins: ALLOWED,
+      sessionId: "test-session",
+      store: new InMemorySessionStore(),
+    });
+    expect(result.tokensUsed).toBe(1234);
+  });
+
+  it("runAgent falls back to a conservative tokensUsed when usage is absent", async () => {
+    const events: AgentEvent[] = [];
+    const { groq } = makeGroq([stopMessage("Answer.")]);
+    const result = await runAgent({
+      mode: "chat",
+      prompt: "hi",
+      origin: ALLOWED[0],
+      groq,
+      write: (e) => events.push(e),
+      allowedOrigins: ALLOWED,
+      sessionId: "test-session",
+      store: new InMemorySessionStore(),
+    });
+    // Conservative fallback: must be at least MAX_OUTPUT_TOKENS (512).
+    expect(result.tokensUsed).toBeGreaterThanOrEqual(512);
+  });
+
+  // Handler-gate coverage gap (documented per Testing-Strategy completeness rule):
+  // streamHandler is not exported and is coupled to runtime globals (awslambda,
+  // real Groq, getSessionStore, getBudgetDeps), so the token-403 and budget-429
+  // paths cannot be exercised in vitest without a broader refactor. The token gate
+  // (verifyAgentToken) and budget gate (reserveRequest) are fully unit-tested in
+  // token.test.ts and budget.test.ts respectively. These handler paths are covered
+  // by manual/runtime verification post-deploy (see Post-Implementation Checklist).
 });

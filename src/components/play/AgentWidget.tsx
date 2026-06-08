@@ -71,6 +71,21 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
 
         setMockMode(false);
 
+        // Mint a fresh same-origin signed token (best-effort). On any failure or
+        // an unconfigured secret ({ token: null }), proceed tokenless — in prod the
+        // Lambda will 403 and the existing error→mock fallback fires. Never block
+        // the UI on token fetch.
+        let token: string | undefined;
+        try {
+          const tokRes = await fetch("/api/agent-token", { signal: controller.signal });
+          if (tokRes.ok) {
+            const data = (await tokRes.json()) as { token?: string | null };
+            token = data.token ?? undefined;
+          }
+        } catch {
+          // Ignore — proceed without a token.
+        }
+
         // Cold-start guard: if no first byte within the timeout, abort and fall back.
         let firstEventSeen = false;
         const coldStart = setTimeout(() => {
@@ -80,8 +95,15 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
         try {
           const gen = streamAgent(
             mode === "pitch"
-              ? { url, mode, locale, signal: controller.signal }
-              : { url, mode, prompt: p, sessionId: getSessionId(), signal: controller.signal },
+              ? { url, mode, locale, token, signal: controller.signal }
+              : {
+                  url,
+                  mode,
+                  prompt: p,
+                  sessionId: getSessionId(),
+                  token,
+                  signal: controller.signal,
+                },
           );
           for await (const event of gen) {
             firstEventSeen = true;
@@ -105,7 +127,9 @@ export function AgentWidget({ agentUrl }: { agentUrl: string | null }) {
           setMockMode(true);
           setEvents([]);
           setStatus("streaming");
-          await consume(runMockAgent({ mode, prompt: p, locale, signal: fallbackController.signal }));
+          await consume(
+            runMockAgent({ mode, prompt: p, locale, signal: fallbackController.signal }),
+          );
         } finally {
           clearTimeout(coldStart);
         }

@@ -10,6 +10,8 @@ import {
   seedSessionState,
   getSessionStore,
 } from "./session-store";
+import { verifyAgentToken } from "./token";
+import { reserveRequest, recordTokens, getBudgetDeps } from "./budget";
 
 const MAX_OUTPUT_TOKENS = 512;
 const PROMPT_MAX_CHARS = 500;
@@ -54,6 +56,9 @@ declare const awslambda: {
       context: unknown,
     ) => Promise<void>,
   ) => unknown;
+  HttpResponseStream: {
+    from(stream: NodeJS.WritableStream, metadata: { statusCode: number }): NodeJS.WritableStream;
+  };
 };
 
 interface LambdaUrlEvent {
@@ -92,6 +97,7 @@ interface GroqMessage {
 
 interface GroqCompletion {
   choices: Array<{ message: GroqMessage; finish_reason?: string }>;
+  usage?: { total_tokens?: number };
 }
 
 export function isOriginAllowed(
@@ -170,7 +176,11 @@ async function createCompletion(groq: GroqLike, messages: GroqMessage[]): Promis
 // chat mode: stateful (history in DynamoDB), requires a prompt.
 // pitch mode: stateless one-shot "Why hire me?", ignores sessionId/history.
 // Returns { forbidden: true } when origin gate fires; otherwise { forbidden: false }.
-export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: boolean }> {
+// Also returns tokensUsed on a successful Groq completion (undefined on forbidden/
+// early-return/validation-error/Groq-error paths).
+export async function runAgent(
+  opts: RunAgentOptions,
+): Promise<{ forbidden: boolean; tokensUsed?: number }> {
   const {
     mode,
     prompt,
@@ -264,7 +274,16 @@ export async function runAgent(opts: RunAgentOptions): Promise<{ forbidden: bool
     res.choices[0]?.message?.content?.trim() || "…I appear to be speechless. That's rare.";
   write({ type: "done", summary: answer });
   if (mode === "chat" && persist) await persist(answer);
-  return { forbidden: false };
+
+  // Conservative fallback when usage is absent: MAX_OUTPUT_TOKENS + coarse input heuristic.
+  const tokensUsed =
+    res.usage?.total_tokens ??
+    MAX_OUTPUT_TOKENS +
+      Math.ceil(
+        (validPrompt.length || (mode === "pitch" ? PITCH_INSTRUCTION[locale].length : 0)) / 4,
+      );
+
+  return { forbidden: false, tokensUsed };
 }
 
 function send(stream: NodeJS.WritableStream, e: AgentEvent): void {
@@ -285,6 +304,7 @@ function parseBody(event: LambdaUrlEvent): unknown {
 
 // The Lambda invocation entrypoint, kept as a plain async function so the module
 // can be imported by unit tests without the `awslambda` runtime global present.
+// Gate order: origin → token → rate-limit → budget → Groq.
 async function streamHandler(
   event: LambdaUrlEvent,
   responseStream: NodeJS.WritableStream,
@@ -304,6 +324,24 @@ async function streamHandler(
     // 403 with no body; Function URL CORS handles preflight separately.
     responseStream.end();
     return;
+  }
+
+  // Parse the request body once; reused by the token gate and the mode extraction.
+  const parsed = parseBody(event);
+
+  // Gate 1.5: signed-token verification (prod-only, REQUIRE_SIGNED_TOKEN=true).
+  // Fail CLOSED: when enforcement is on, an unset secret or any invalid token
+  // is rejected with 403 (no body, no Groq call, no budget increment).
+  // This is what defeats the spoofed-Origin bypass: a bot can fake the Origin
+  // header but cannot obtain a valid signed token without going through the site.
+  if (process.env.REQUIRE_SIGNED_TOKEN === "true") {
+    const secret = process.env.AGENT_SIGNING_SECRET ?? "";
+    const token = (parsed as { token?: unknown })?.token;
+    if (!secret || !verifyAgentToken(token, secret, Date.now()).ok) {
+      awslambda.HttpResponseStream.from(responseStream, { statusCode: 403 });
+      responseStream.end();
+      return;
+    }
   }
 
   // Gate 2: per-IP rate limit. Two layers, both after the origin gate and before
@@ -336,7 +374,6 @@ async function streamHandler(
   }
 
   try {
-    const parsed = parseBody(event);
     const rawMode = (parsed as { mode?: unknown })?.mode;
     const mode: "chat" | "pitch" = rawMode === "pitch" ? "pitch" : "chat";
     const prompt = (parsed as { prompt?: unknown })?.prompt;
@@ -345,7 +382,18 @@ async function streamHandler(
     const rawSessionId = (parsed as { sessionId?: unknown })?.sessionId;
     const sessionId = isValidSessionId(rawSessionId) ? rawSessionId : undefined;
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY }) as unknown as GroqLike;
-    await runAgent({
+
+    // Two-axis daily budget cap (best-effort, fail-open). Reserve a request slot
+    // BEFORE calling Groq; if either ceiling is hit, 429 → frontend silent mock.
+    const budgetDeps = getBudgetDeps();
+    const budget = await reserveRequest(budgetDeps);
+    if (!budget.allowed) {
+      awslambda.HttpResponseStream.from(responseStream, { statusCode: 429 });
+      responseStream.end();
+      return;
+    }
+
+    const result = await runAgent({
       mode,
       prompt: prompt as string | undefined,
       locale,
@@ -358,6 +406,11 @@ async function streamHandler(
       store: getSessionStore(),
       ipHash,
     });
+
+    // Record actual token usage after a successful Groq completion (best-effort).
+    if (result.tokensUsed !== undefined) {
+      await recordTokens(budgetDeps, result.tokensUsed);
+    }
   } catch {
     send(responseStream, { type: "error", message: "Agent failed" });
   } finally {

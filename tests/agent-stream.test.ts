@@ -49,6 +49,7 @@ describe("streamAgent body", () => {
     expect(body.mode).toBe("chat");
     expect(body.prompt).toBe("hi");
     expect(body.sessionId).toBe("s");
+    expect(body.token).toBeUndefined();
   });
 
   it("streamAgent pitch body includes mode and locale, no prompt", async () => {
@@ -72,6 +73,29 @@ describe("streamAgent body", () => {
     expect(body.mode).toBe("pitch");
     expect(body.locale).toBe("cs");
     expect(body.prompt).toBeUndefined();
+  });
+
+  it("streamAgent includes token in the body when provided", async () => {
+    let capturedBody: string | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init: RequestInit) => {
+        capturedBody = init.body as string;
+        return Promise.resolve(fakeResponse(['{"type":"done","summary":"ok"}\n']));
+      }),
+    );
+    const events: AgentEvent[] = [];
+    for await (const e of streamAgent({
+      url: "http://x",
+      mode: "chat",
+      prompt: "hi",
+      sessionId: "s",
+      token: "sig.tok",
+    })) {
+      events.push(e);
+    }
+    const body = JSON.parse(capturedBody!);
+    expect(body.token).toBe("sig.tok");
   });
 });
 

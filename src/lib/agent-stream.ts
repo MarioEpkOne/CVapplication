@@ -6,6 +6,7 @@ export interface StreamAgentOptions {
   prompt?: string;
   sessionId?: string;
   locale?: "cs" | "en";
+  token?: string;
   signal?: AbortSignal;
 }
 
@@ -41,6 +42,7 @@ export async function* streamAgent(opts: StreamAgentOptions): AsyncGenerator<Age
       prompt: opts.prompt,
       sessionId: opts.sessionId,
       locale: opts.locale,
+      token: opts.token,
     }),
     signal: opts.signal,
   });
