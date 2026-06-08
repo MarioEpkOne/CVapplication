@@ -1,15 +1,15 @@
 // Cover letter data - config-driven so sections reorder/add/remove freely.
 // The structure (id, heading, body[]) is fixed; locale map selects the right version.
- 
+
 export interface LetterSection {
   id: "hook" | "orchestration" | "why-here" | "why-me" | string;
   eyebrow?: string;
   heading: string;
   body: string[]; // paragraphs
 }
- 
+
 // ─── Czech cover letter ───────────────────────────────────────────────────────
- 
+
 export const letterSectionsCz: LetterSection[] = [
   {
     id: "hook",
@@ -36,7 +36,7 @@ export const letterSectionsCz: LetterSection[] = [
     eyebrow: "Proč tahle práce",
     heading: "Technická analýza předchází psaní kódu.",
     body: [
-      "K problémům přistupuju s rigorózitou. Nejdřív porozumět systému, pak navrhovat řešení. Tohle mám z backendu, kde ownership nad větší featurou znamená rozumět tomu, co děláte, dřív než to napíšete. A z předchozích let v technické podpoře, kde jsem denně tracoval cizí bugy až do kódu.",
+      "K problémům přistupuju s rigorózitou. Nejdřív porozumět systému, pak navrhovat řešení. Tohle mám z backendu, kde ownership nad větší featurou znamená rozumět tomu, co děláte, dřív než to napíšete. A z předchozích let v technické podpoře, kde jsem denně tracoval cizí bugy až do kódu. Pointa je prostá - problém zachycený při analýze už nedostane šanci stát reálné peníze v produkci.",
       "Hledám tým, kde technická analýza předchází kódování, protože sám to dělám stejně.",
     ],
   },
@@ -52,9 +52,9 @@ export const letterSectionsCz: LetterSection[] = [
     ],
   },
 ];
- 
+
 // ─── English cover letter ─────────────────────────────────────────────────────
- 
+
 export const letterSectionsEn: LetterSection[] = [
   {
     id: "hook",
@@ -81,7 +81,7 @@ export const letterSectionsEn: LetterSection[] = [
     eyebrow: "Why this work",
     heading: "Technical analysis comes before writing code.",
     body: [
-      "I approach problems rigorously - first understand the system, then design the solution. That comes from backend work, where owning a larger feature means understanding what you're doing before you write it. And from earlier years in technical support, where I traced other people's bugs down to the code every day.",
+      "I approach problems rigorously - first understand the system, then design the solution. That comes from backend work, where owning a larger feature means understanding what you're doing before you write it. And from earlier years in technical support, where I traced other people's bugs down to the code every day. The point is simple - a problem caught in analysis never gets the chance to cost real money in production.",
       "I'm looking for a team where technical analysis comes before coding, because that's how I work too.",
     ],
   },
@@ -97,7 +97,7 @@ export const letterSectionsEn: LetterSection[] = [
     ],
   },
 ];
- 
+
 // ─── Locale map ───────────────────────────────────────────────────────────────
- 
+
 export const letterSections = { cs: letterSectionsCz, en: letterSectionsEn } as const;
