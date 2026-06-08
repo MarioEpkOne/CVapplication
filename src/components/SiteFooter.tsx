@@ -9,17 +9,19 @@ export function SiteFooter() {
 
   return (
     <footer className="no-print mt-8 border-t border-brand-200 pt-4 pb-safe-or-4 text-center text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
-      <p>
-        {l.builtBy}{" "}
-        <a
-          href="https://github.com/MarioEpkOne/CVapplication"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block py-1 underline hover:text-brand-700"
-        >
-          {l.viewSource}
-        </a>
-      </p>
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <p>
+          {l.builtBy}{" "}
+          <a
+            href="https://github.com/MarioEpkOne/CVapplication"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block py-1 underline hover:text-brand-700"
+          >
+            {l.viewSource}
+          </a>
+        </p>
+      </div>
     </footer>
   );
 }
