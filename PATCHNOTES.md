@@ -1,5 +1,16 @@
-<!-- last-commit: 6488c8a98176d15e07fc0997022f5617827131b5 -->
+<!-- last-commit: 1e6531b7124351da7ceff945a931b75d17c4ee2a -->
 # Patch Notes
+
+## v0.15.0 — 2026-06-09
+
+### fix dangling em-dash and double space in README intro
+Tidied the README introduction — removed a stray em-dash and a double space. Documentation-only; no code or behavior change.
+
+### mobile responsive optimization (viewport, touch targets, fluid type)
+Comprehensive mobile pass across the whole app. Adds the Next.js `viewport` export (`device-width`, `viewport-fit=cover`, light/dark `theme-color`) with pinch-zoom deliberately left enabled, switches the root layout to `min-h-dvh`, and introduces fluid `clamp()` typography tokens for headings. Raises all interactive controls (TabBar tabs, theme/locale toggles, agent prompt buttons, print button) to 44px touch targets, gates the hero magnetic-button and portrait-tilt effects behind a fine-pointer + reduced-motion check (with `whileTap` feedback so taps still respond on touch), tightens the TabBar to fit a 320px screen, adds safe-area inset utilities, and makes previously fixed-size elements (agent trace box, /play photo, avatar, experience timeline) responsive.
+
+### apply pb-safe-or-4 to SiteFooter to satisfy E6 inset clause
+Applies the `pb-safe-or-4` safe-area utility to the site footer so its bottom padding respects the iPhone home-indicator inset (`max(1rem, env(safe-area-inset-bottom))`), with no visual change on devices without an inset. Completes edge case E6 of the mobile-responsive spec.
 
 ## v0.14.1 — 2026-06-08
 
