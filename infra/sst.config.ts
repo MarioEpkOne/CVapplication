@@ -36,6 +36,10 @@ export default $config({
       // from this (streaming ? RESPONSE_STREAM : BUFFERED) — there is no
       // `url.invokeMode` property, so this top-level flag is the only switch.
       streaming: true,
+      // D1: hard ceiling on parallel executions. A bot cannot fan out to
+      // unbounded simultaneous Groq calls / DynamoDB writes regardless of IP
+      // rotation. 5 is ample for a portfolio site's honest traffic.
+      concurrency: { reserved: 5 },
       link: [groqKey, sessions],
       environment: {
         GROQ_API_KEY: groqKey.value,

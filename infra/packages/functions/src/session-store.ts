@@ -22,10 +22,13 @@ export interface HistoryMessage {
 
 export interface SessionState {
   history: HistoryMessage[];
+  ipHash?: string;
 }
 
 export interface SessionStore {
-  load(sessionId: string): Promise<SessionState>; // seeds a fresh state if absent
+  // D5: an optional ipHash binds the session to its creating IP. A load with a
+  // non-matching ipHash returns a freshly seeded state (no cross-session leak).
+  load(sessionId: string, ipHash?: string): Promise<SessionState>; // seeds a fresh state if absent
   save(sessionId: string, state: SessionState): Promise<void>;
 }
 
@@ -41,11 +44,21 @@ function capHistory(history: HistoryMessage[]): HistoryMessage[] {
 // In-memory fake for unit tests (and a degraded fallback if needed).
 export class InMemorySessionStore implements SessionStore {
   private map = new Map<string, SessionState>();
-  async load(sessionId: string): Promise<SessionState> {
-    return this.map.get(sessionId) ?? seedSessionState();
+  async load(sessionId: string, ipHash?: string): Promise<SessionState> {
+    const stored = this.map.get(sessionId);
+    if (!stored) return seedSessionState();
+    // D5/E5/E6: only reset when a stored ipHash is present AND differs from the
+    // caller's. A stored row without ipHash (pre-binding) is returned as-is.
+    if (typeof stored.ipHash === "string" && ipHash && stored.ipHash !== ipHash) {
+      return seedSessionState();
+    }
+    return stored;
   }
   async save(sessionId: string, state: SessionState): Promise<void> {
-    this.map.set(sessionId, { history: capHistory(state.history) });
+    this.map.set(sessionId, {
+      history: capHistory(state.history),
+      ...(state.ipHash ? { ipHash: state.ipHash } : {}),
+    });
   }
 }
 
@@ -61,7 +74,7 @@ export class DynamoSessionStore implements SessionStore {
     private tableName: string,
   ) {}
 
-  async load(sessionId: string): Promise<SessionState> {
+  async load(sessionId: string, ipHash?: string): Promise<SessionState> {
     const res = await this.client.send(
       new GetCommand({ TableName: this.tableName, Key: { sessionId } }),
     );
@@ -69,7 +82,17 @@ export class DynamoSessionStore implements SessionStore {
     if (!item || !Array.isArray(item.history)) {
       return seedSessionState();
     }
-    return { history: item.history as HistoryMessage[] };
+    // D5: session is bound to its creating IP. A mismatched ticket gets a fresh
+    // session (no leak). E5: a stored row WITHOUT ipHash (pre-binding) is
+    // returned as-is — never mass-reset existing sessions on deploy. E6: when
+    // the caller's ipHash is defined (even hash of "unknown"), binding applies.
+    if (typeof item.ipHash === "string" && ipHash && item.ipHash !== ipHash) {
+      return seedSessionState();
+    }
+    return {
+      history: item.history as HistoryMessage[],
+      ipHash: item.ipHash as string | undefined,
+    };
   }
 
   async save(sessionId: string, state: SessionState): Promise<void> {
@@ -81,6 +104,9 @@ export class DynamoSessionStore implements SessionStore {
           sessionId,
           history: capHistory(state.history),
           expiresAt,
+          // D5: persist the creating IP's hash so load() can bind to it. Only
+          // written when present (omitted for unbound/pitch paths).
+          ...(state.ipHash ? { ipHash: state.ipHash } : {}),
         },
       }),
     );

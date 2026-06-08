@@ -68,3 +68,52 @@ describe("InMemorySessionStore", () => {
     expect(loaded.history).toHaveLength(8);
   });
 });
+
+describe("DynamoSessionStore ipHash binding", () => {
+  it("save persists ipHash when present on state", async () => {
+    const sends: unknown[] = [];
+    const client: DocClientLike = {
+      send: vi.fn(async (cmd: unknown) => {
+        sends.push(cmd);
+        return {};
+      }),
+    };
+    const store = new DynamoSessionStore(client, "T");
+    await store.save("s", { history: [{ role: "user", content: "hi" }], ipHash: "HASH" });
+    const put = sends[0] as { input: { Item: { ipHash?: string } } };
+    expect(put.input.Item.ipHash).toBe("HASH");
+  });
+
+  it("load with matching ipHash returns the stored history", async () => {
+    const client: DocClientLike = {
+      send: vi.fn(async () => ({
+        Item: { sessionId: "x", history: [{ role: "user", content: "hi" }], ipHash: "HASH" },
+      })),
+    };
+    const store = new DynamoSessionStore(client, "T");
+    const state = await store.load("x", "HASH");
+    expect(state.history).toEqual([{ role: "user", content: "hi" }]);
+  });
+
+  it("load with mismatched ipHash returns a freshly seeded (empty) history (E6)", async () => {
+    const client: DocClientLike = {
+      send: vi.fn(async () => ({
+        Item: { sessionId: "x", history: [{ role: "user", content: "secret" }], ipHash: "HASH" },
+      })),
+    };
+    const store = new DynamoSessionStore(client, "T");
+    const state = await store.load("x", "DIFFERENT");
+    expect(state.history).toEqual([]); // bound to creating IP — no leak
+  });
+
+  it("load of a stored item WITHOUT ipHash returns stored history regardless of caller ipHash (E5 backward-compat)", async () => {
+    const client: DocClientLike = {
+      send: vi.fn(async () => ({
+        Item: { sessionId: "x", history: [{ role: "user", content: "legacy" }] },
+      })),
+    };
+    const store = new DynamoSessionStore(client, "T");
+    const state = await store.load("x", "ANY");
+    expect(state.history).toEqual([{ role: "user", content: "legacy" }]); // not reset
+  });
+});
