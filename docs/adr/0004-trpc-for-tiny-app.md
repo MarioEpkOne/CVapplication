@@ -54,6 +54,8 @@ Not:
 trpc.createClient({ transformer: superjson }) // v10 style — breaks in v11
 ```
 
+This applies to the **client** link. The **server** init (`initTRPC.create({ transformer })` in `src/server/trpc.ts`) still takes the transformer in its root config — both coexist; only the client moved it to the link.
+
 ---
 
 ## Consequences

@@ -24,7 +24,7 @@ npm run typecheck    # tsc --noEmit
 npm run test         # vitest run
 npm run test:watch   # vitest in watch mode
 npm run db:generate  # drizzle-kit generate → drizzle/ SQL migration
-npm run db:migrate   # Apply migrations to local ./data/app.db (dev only)
+npm run db:migrate   # Apply migrations to local ./data/app.db via tsx src/server/db/migrate.ts (dev only)
 ```
 
 **Test layout** (not colocated with source): root tests live in `tests/` (vitest `include: ["tests/**/*.test.ts"]`, `node` env) — run one with `npx vitest run tests/<name>.test.ts`. Frontend logic that needs a test (stream parser, mock agent) lives in a module under `src/lib` or `src/components` and is tested from `tests/`; there is **no jsdom/RTL**, so React components are not unit-tested. The Lambda has its own suite under `infra/packages/functions/tests/` (run via `cd infra && npm test`).
@@ -97,7 +97,7 @@ infra/ (separate SST workspace, NOT part of the Next.js build)
 | `src/server/services/sanitize.ts` | Pure sanitization functions — strip control chars + escape HTML. |
 | `src/server/db/schema.ts` | One table: `pageviews`. No leaderboard. |
 | `src/app/globals.css` | Tailwind v4 CSS-first config — all brand tokens live here in `@theme`. |
-| `scripts/migrate.mjs` | Standalone ESM migration runner (no tsx needed at runtime). |
+| `scripts/migrate.mjs` | Standalone ESM migration runner used in **production/Docker** by `start.sh` (no tsx needed at runtime). The `npm run db:migrate` **dev** script instead uses `tsx src/server/db/migrate.ts`. |
 
 ---
 
@@ -151,7 +151,7 @@ DO NOT commit `./data/` (gitignored). Never call `db:migrate` in production — 
 | `NEXT_PUBLIC_AGENT_MODE` | `.env.local` (dev only) | Set to `mock` to force the offline mock agent |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | GitHub Actions secrets | SST deploy from CI |
 
-Reference `.env.example` for the full list. **Never commit real values.**
+Reference `.env.example` for the Next.js/Fly env vars. **Never commit real values.** The Lambda's own vars (`GROQ_API_KEY`, `ALLOWED_ORIGINS`, `REQUIRE_ORIGIN`, `SESSIONS_TABLE`) are managed by SST in `infra/sst.config.ts`, not in `.env.example`.
 
 ## Dev-environment tooling (WSL2)
 

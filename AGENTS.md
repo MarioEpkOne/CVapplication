@@ -18,7 +18,7 @@ Read `CLAUDE.md` for the full architecture, commands, conventions, and gotchas.
 
 ### Hard constraints
 1. **No hard-coded content in JSX** — resume renders only from `src/data/resume.ts`; cover letter only from `src/data/cover-letter.ts`.
-2. **No leaderboard table, no game logic** in this codebase — the Play tab is a placeholder. Do not add `leaderboard` to `schema.ts` or create game routes.
+2. **No leaderboard table, no game logic** in this codebase — the Play tab is a live "Ask the Agent" feature backed by an AWS Lambda (see `infra/`), not a game. Do not add `leaderboard` to `schema.ts` or create game routes; new `/play` work must integrate with the existing agent framework.
 3. **No `.cursor/rules`** — do not create this. Mario uses Claude Code.
 4. **Secrets never committed** — use `.env.example` for documentation; real values via Fly secrets and GitHub Actions secrets.
 

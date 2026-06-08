@@ -12,13 +12,13 @@ This is a deliberately over-engineered interactive resume + cover letter, built 
 |-----|-----|-----------|
 | Resume | `/` | Data-driven CV — all content from `src/data/resume.ts` |
 | Cover Letter | `/cover-letter` | Scrollytelling letter — content from `src/data/cover-letter.ts` |
-| Play | `/play` | Placeholder for a future Agent Orchestrator mini-game |
+| Play | `/play` | "Ask the Agent" — a live serverless agent (AWS Lambda + Groq Llama 3.3 70B) that answers questions about Mario, with an offline mock fallback |
 
 ### Features
 - **Print-to-PDF**: browser print with CSS that hides UI chrome and forces light colors
-- **Dark mode**: default light (`#f5ecff` brand background), toggle persists to localStorage
+- **Dark mode**: default light (`#ffffff` brand background, cyan accent), toggle persists to localStorage
 - **Cookieless analytics**: first-party pageview tRPC ping to SQLite — no third-party, no cookie banner
-- **OG image**: branded purple card via `next/og`
+- **OG image**: branded cyan gradient card via `next/og`
 - **Vitest suite**: covers sanitization, rate-limit, and data integrity
 
 ---

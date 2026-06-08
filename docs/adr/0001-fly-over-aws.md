@@ -17,7 +17,13 @@ The question was: do we mirror the deployment platform too, or be honest?
 
 Deploy on **Fly.io**, not AWS — and be upfront about it, with a wink.
 
-The footer says: "AWS shop, runs on Fly." The cover letter acknowledges it. This ADR documents the choice.
+The cover letter acknowledges it with a wink ("AWS shop, runs on Fly"). This ADR documents the choice.
+
+---
+
+## Addendum (2026-06-05)
+
+The web tier still runs on Fly.io. The **"Ask the Agent" (Play page)** feature was later added as an **AWS Lambda** (SST, `infra/`) — a deliberate, scoped use of serverless AWS for streaming LLM responses. This does not reverse the decision above (the application is Fly-hosted); it demonstrates AWS familiarity where serverless genuinely fits. See `CLAUDE.md` → "Ask the Agent".
 
 ---
 
