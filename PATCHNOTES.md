@@ -1,5 +1,22 @@
-<!-- last-commit: 20427396cce0bc0760390203ccf312e8b11d794f -->
+<!-- last-commit: 6488c8a98176d15e07fc0997022f5617827131b5 -->
 # Patch Notes
+
+## v0.14.1 — 2026-06-08
+
+### fix(infra): reject paths must flush the streaming status prelude
+The Lambda's 403/429 reject paths ended the response stream without writing first, so on a RESPONSE_STREAM Function URL the HTTP status stayed at the default 200 (the status/header prelude is only flushed on the first write). The browser saw 200 and waited out the full ~10s cold-start timeout instead of fast-failing to the offline mock. A shared `sendReject()` helper now writes one byte through the wrapped stream before ending it, and the origin (403), token (403), and budget (429) rejects all route through it. Adds 3 unit tests; security was unchanged (rejects still leak no body and spend no Groq/budget).
+
+### Revise README for clarity and formatting
+Trimmed the README intro and removed the standalone "AWS by default, runs on Fly" and "Agent context" sections, plus normalized the title dash. Slims the landing documentation to the essentials; no effect on the app.
+
+### docs: split Lambda context into nested infra/CLAUDE.md
+Moved the deep Lambda/SST/Groq gotchas out of the always-loaded root `CLAUDE.md` into a focused `infra/CLAUDE.md` that auto-loads only when working under `infra/`. The root keeps the cross-boundary facts (infra excluded from build/lint/test, the two mirrored files, the shared signing secret) and points to the nested doc — reducing always-on context for non-infra work.
+
+### content(cover-letter): tie upfront analysis to cost in why-here
+Added a closing sentence to the why-here section in both CZ and EN that makes the business payoff explicit — catching problems during analysis before they cost money in production.
+
+### chore: remove dead code and stale internal KB from public repo
+Audit-driven cleanup of the public repo with no app behavior change: untracked `.claude/pipeline-kb/` (stale internal pipeline notes, kept on disk locally), deleted the dead `TTL_SECONDS` constant and its suppressed eslint-disable in the Lambda's `token.ts`, removed the unused `GroqToolCall` interface and `tool_calls?` field from `agent.ts` (leftovers from the pre-no-tools design), documented the sign/verify trust boundary on `verifyAgentToken`, dropped the orphaned `comingSoon` label keys, and broadened the `.env` ignore rules to `.env*` with `!.env.example` as defense-in-depth against a future secret leak.
 
 ## v0.14.0 — 2026-06-08
 
