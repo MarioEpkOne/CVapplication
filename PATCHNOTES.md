@@ -1,5 +1,16 @@
-<!-- last-commit: 76c794211c0b2a07654e6b28cadea18c55c3afeb -->
+<!-- last-commit: 20427396cce0bc0760390203ccf312e8b11d794f -->
 # Patch Notes
+
+## v0.14.0 — 2026-06-08
+
+### HMAC signed-token gate + two-axis daily budget cap for agent Lambda
+The "Ask the Agent" Lambda now defends against bots that bypass the website and call the Function URL directly. A new same-origin `/api/agent-token` route mints a short-lived (~60s) HMAC-signed token that the browser attaches to each request; the Lambda verifies it (prod-only, fail-closed) — replacing the trivially-spoofable `Origin` header as the "came from my site" signal. A second defense caps daily Groq usage on two axes (requests and tokens) via an atomic per-UTC-day DynamoDB counter set ~15% under Groq's free-tier limits; when either ceiling is hit the Lambda returns 429 and the widget silently falls back to the offline mock. Both reuse the existing `AgentSessions` table and sit alongside the per-IP rate limiter and prompt-injection hardening already in place.
+
+### drop reserved concurrency — account quota is 10, can't reserve
+Removed `concurrency: { reserved: 5 }` from the Lambda config: this AWS account's region-wide concurrency quota is the new-account default of 10, and AWS rejects reserving against it (the unreserved pool must stay ≥ 10), so the deploy 400'd. The account ceiling already caps total parallelism and the DynamoDB per-IP limiter bounds per-attacker abuse, so no protection is lost.
+
+### commit reworded resume draft, replace em-dashes with hyphens
+Content pass over the resume copy — reworded a draft section and swapped em-dashes for plain hyphens for consistency. No structural or code changes.
 
 ## v0.13.0 — 2026-06-08
 
