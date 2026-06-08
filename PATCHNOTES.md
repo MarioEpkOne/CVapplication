@@ -1,5 +1,10 @@
-<!-- last-commit: 1e6531b7124351da7ceff945a931b75d17c4ee2a -->
+<!-- last-commit: 544ee22b13dd323cc98e766981b44cc5af461353 -->
 # Patch Notes
+
+## v0.15.1 — 2026-06-09
+
+### center top bar and footer on shared max-w-6xl axis
+Fixed the top navigation bar, which the mobile-responsive change had left full-bleed so its tabs and toggles hugged the screen edges instead of lining up with the centered page content. The nav and footer now wrap their contents in a centered `max-w-6xl` container (matching the Hero), so the global chrome shares one center axis across all pages, and the nav's horizontal gutter can no longer be collapsed by the safe-area padding cascade. Visual-alignment fix only — no logic, content, accessibility, or dark-mode changes.
 
 ## v0.15.0 — 2026-06-09
 
