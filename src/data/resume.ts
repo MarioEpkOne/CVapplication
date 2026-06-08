@@ -23,16 +23,17 @@ export const resumeCs: ResumeData = {
   },
 
   summary:
-    "Specializuji se na orchestraci AI agentů a vývoj backendových systémů. Na AI agentní přístupy jsem přišel nezávisle budováním uzavřených pipeline s Claude Code, kde agenti plánují, píší kód a předávají si kontext prostřednictvím strukturovaných artefaktů. Na backend přináším solidní základ v Java/Kotlin/Spring Boot ze 3 let komerčního vývoje softwaru.",
+    "Backendový vývojář se třemi lety komerční praxe v Javě, Kotlinu a Spring Bootu pro klienty z farmacie, fintechu a logistiky. Programuji i v Pythonu. Poslední rok se naplno věnuji agentnímu vývoji: napojuji AI kódovací agenty do opakovatelných pipeline, které řeší plánování, implementaci a review nad strukturovaným kontextem projektu, místo nahodilého promptování.",
 
   experience: [
     {
       company: "vlastní projekty",
       role: "AI & Agentic Developer",
-      period: "2025 — současnost",
+      period: "2025 - současnost",
       bullets: [
-        "Postavil uzavřené agent pipeline (plánování → implementace → review → commit) s Claude Code a MCP servery.",
-        "Vytvořil 6 AI nástrojů — od prompt analytiky po emailový triage plugin — demonstrující end-to-end agentic workflow.",
+        "Vypracoval jsem postup, jak agenty řídit přes kontext: strukturované projektové soubory a sepsané implementační plány, které si agent přečte dřív, než sáhne na kód, takže jeho výstup drží v realitě konkrétního projektu.",
+        "Postavil jsem agentní pipeline, která provede změnu od plánu přes implementaci a review až po commit; koordinaci zajišťují MCP servery.",
+        "Vydal jsem šest menších AI nástrojů, od prompt analytiky po plugin na třídění e-mailů; každý pokrývá jiný kus agentního workflow.",
       ],
     },
     {
@@ -40,16 +41,16 @@ export const resumeCs: ResumeData = {
       role: "Software Engineer",
       period: "2,5 roku",
       bullets: [
-        "Vyvíjel backend řešení pro zákazníky z oblasti farmacie, platebních systémů a logistiky.",
-        "Navrhoval a implementoval REST API rozhraní pro integraci s externími systémy.",
-        "Spolupracoval v agilním týmu, účastnil se code review a přispíval k technické dokumentaci.",
+        "Vyvíjel a udržoval jsem backendové služby v Javě, Kotlinu a Spring Bootu pro klienty z farmacie, plateb a logistiky.",
+        "Navrhoval jsem REST API pro propojení s externími systémy.",
+        "Dělal jsem code review, psal technickou dokumentaci a fungoval v běžném provozu agilního týmu.",
       ],
       tech: ["Java", "Kotlin", "Spring Boot", "PostgreSQL", "REST API"],
       projects: [
         {
-          name: "AstraZeneca — Systém pro distribuci léčiv",
+          name: "AstraZeneca - Systém pro distribuci léčiv",
           description:
-            "V devítičlenném týmu jsem modernizoval více než 10 let starý systém pro distribuci léčiv do lékáren a nemocnic po celé České republice. Dodali jsme rychlejší a intuitivnější uživatelské rozhraní, odstranili opakující se chyby původního softwaru a zajistili rychlé generování reportů a statistik. Pracoval jsem v agilním procesu založeném na pravidelných schůzkách se zainteresovanými stranami; systém byl dodán jako kompletní cloud-native produkt s úplnou dokumentací.",
+            "V devítičlenném týmu jsem pomáhal přepsat víc než deset let starý systém pro distribuci léčiv do lékáren a nemocnic po celé ČR. Legacy aplikaci jsme nahradili cloud-native řešením, které se zbavilo jejích letitých chyb a zrychlilo generování reportů a statistik. Šlo o běžný agilní proces s pravidelnými schůzkami se zainteresovanými stranami.",
           tech: [
             "React",
             "Kotlin",
@@ -62,9 +63,9 @@ export const resumeCs: ResumeData = {
           ],
         },
         {
-          name: "Global Payments — Platforma pro vydávání karet (Card-Issuing-as-a-Service)",
+          name: "Global Payments - Platforma pro vydávání karet (Card-Issuing-as-a-Service)",
           description:
-            "V týmu o 7–10 lidech jsem se podílel na vývoji moderní platformy pro vydávání a správu karet, která koncovým zákazníkům umožňuje zabudovat fyzické i digitální platební karty do vlastních produktů během šesti měsíců, a to bez bankovní licence. Spojuje tvorbu, vydávání a správu karet s integrací do interních systémů Global Payments na modulární, API-first a škálovatelné (MACH) architektuře navržené pro dlouhodobou udržovatelnost.",
+            "V týmu o sedmi až deseti lidech jsem pracoval na platformě pro vydávání karet, která firmě umožní nabízet vlastní fyzické i digitální platební karty bez bankovní licence. Platforma propojuje tvorbu a správu karet s interními systémy Global Payments a díky API-first přístupu zákazníkům zkracuje cestu na trh z let na měsíce.",
           tech: ["Java", "JVM", "React", "Docker", "HashiCorp Consul"],
         },
       ],
@@ -76,7 +77,7 @@ export const resumeCs: ResumeData = {
       bullets: [
         "Prováděl root-cause analýzu složitých technických problémů zákazníků a navrhoval řešení.",
         "Spolupracoval napříč týmy (vývoj, QA, product) na eskalovaných případech.",
-        "Přispíval do znalostní báze — vytvářel technické články a best-practice průvodce.",
+        "Přispíval do znalostní báze - vytvářel technické články a best-practice průvodce.",
       ],
     },
   ],
@@ -84,11 +85,27 @@ export const resumeCs: ResumeData = {
   skills: [
     {
       group: "AI & agentické nástroje",
-      items: ["Claude Code", "MCP servery", "orchestrace agentů", "prompt engineering", "tool use", "RAG"],
+      items: [
+        "Claude Code",
+        "MCP servery",
+        "orchestrace agentů",
+        "prompt engineering",
+        "tool use",
+        "RAG",
+      ],
     },
     {
       group: "Backend",
-      items: ["Java", "Kotlin", "Spring Boot", "REST API", "PostgreSQL", "SQL", "TypeScript", "Node.js"],
+      items: [
+        "Java",
+        "Kotlin",
+        "Spring Boot",
+        "REST API",
+        "PostgreSQL",
+        "SQL",
+        "TypeScript",
+        "Node.js",
+      ],
     },
     {
       group: "Cloud & CI/CD",
@@ -96,13 +113,19 @@ export const resumeCs: ResumeData = {
     },
     {
       group: "Proces & spolupráce",
-      items: ["dekompozice procesů", "root-cause analýza", "code review", "agile/scrum", "technická dokumentace"],
+      items: [
+        "dekompozice procesů",
+        "root-cause analýza",
+        "code review",
+        "agile/scrum",
+        "technická dokumentace",
+      ],
     },
   ],
 
   education: [
     {
-      school: "Střední průmyslová škola — elektrotechnika",
+      school: "Střední průmyslová škola - elektrotechnika",
       credential: "Stredná škola elektrotechnická, Trnava, Slovensko",
     },
   ],
@@ -118,33 +141,33 @@ export const resumeCs: ResumeData = {
     {
       name: "PipelineIQ",
       blurb:
-        "Uzavřená agent pipeline pro vývoj softwaru — plánování, implementace, review a commit řízené AI agenty se strukturovanými artefakty jako kontextem.",
+        "Uzavřená agent pipeline pro vývoj softwaru - plánování, implementace, review a commit řízené AI agenty se strukturovanými artefakty jako kontextem.",
     },
     {
       name: "PromptIQ",
       blurb:
-        "Prompt analytika pro Claude Code — sleduje výkon promptů, identifikuje vzory a pomáhá optimalizovat agentic workflow.",
+        "Prompt analytika pro Claude Code - sleduje výkon promptů, identifikuje vzory a pomáhá optimalizovat agentic workflow.",
     },
     {
       name: "AI Assistant",
       blurb:
-        "Nasazený AI asistent nad Obsidian znalostní bází — odpovídá na dotazy s kontextem z osobních poznámek pomocí RAG.",
+        "Nasazený AI asistent nad Obsidian znalostní bází - odpovídá na dotazy s kontextem z osobních poznámek pomocí RAG.",
     },
     {
       name: "Email Brief IQ",
       blurb:
-        "Plugin pro Claude Code umožňující emailový triage — sumarizuje doručenou poštu a navrhuje odpovědi přímo v agentic workflow.",
+        "Plugin pro Claude Code umožňující emailový triage - sumarizuje doručenou poštu a navrhuje odpovědi přímo v agentic workflow.",
     },
     {
       name: "UXIQ",
       blurb:
-        "Python CLI nástroj pro audity přístupnosti UI — automatizuje kontroly WCAG a generuje akční reporty.",
+        "Python CLI nástroj pro audity přístupnosti UI - automatizuje kontroly WCAG a generuje akční reporty.",
     },
     {
       name: "Tato CV aplikace",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce. Next.js, tRPC, Drizzle, agent-context artefakty jako deliverable první třídy. Součástí je i rozpracovaná živá ukázka „Zeptej se agenta“ (serverless agent na AWS Lambda) — zatím experimentální.",
+        "Záměrně přeinženýrovaný interaktivní životopis + motivační dopis jako ukázka práce. Next.js, tRPC, Drizzle, agent-context artefakty jako deliverable první třídy. Součástí je i rozpracovaná živá ukázka „Zeptej se agenta“ (serverless agent na AWS Lambda) - zatím experimentální.",
     },
   ],
 
@@ -179,17 +202,17 @@ export const resumeEn: ResumeData = {
   },
 
   summary:
-    "I specialise in AI agent orchestration and backend systems development. I arrived at agentic approaches independently — by building closed-loop pipelines with Claude Code where agents plan, write code, and hand off context through structured artifacts. On the backend side, I bring three years of commercial Java/Kotlin/Spring Boot development across fintech, pharma, and logistics domains.",
+    "Backend engineer with three years of commercial Java, Kotlin, and Spring Boot across pharma, fintech, and logistics clients. I also build in Python. Over the past year I've focused on agentic development: wiring AI coding agents into repeatable pipelines that plan, implement, and review changes against structured project context, instead of one-off prompting.",
 
   experience: [
     {
       company: "personal projects",
       role: "AI & Agentic Developer",
-      period: "2025 — present",
+      period: "2025 - present",
       bullets: [
-        "Developed a context-writing methodology: structured CLAUDE.md, AGENTS.md, and Implementation Plans as first-class context for AI agents.",
-        "Built closed-loop agent pipelines (planning → implementation → review → commit) using Claude Code and MCP servers.",
-        "Shipped 6 AI tools — from prompt analytics to an email triage plugin — demonstrating end-to-end agentic workflows.",
+        "Worked out a context-first way of driving AI coding agents: structured project-context files and written implementation plans the agent reads before it touches code, so its output stays anchored to the real codebase.",
+        "Built agent pipelines that carry a change from planning through implementation, review, and commit, coordinated over MCP servers.",
+        "Shipped six small AI tools, from prompt analytics to an email-triage plugin, each one a different slice of an agent workflow.",
       ],
     },
     {
@@ -197,16 +220,16 @@ export const resumeEn: ResumeData = {
       role: "Software Engineer",
       period: "2.5 years",
       bullets: [
-        "Delivered backend solutions for clients in pharma, payments, and logistics on Java/Kotlin/Spring Boot.",
-        "Designed and implemented REST API interfaces for third-party system integration.",
-        "Collaborated in agile teams, participated in code review, and contributed to technical documentation.",
+        "Built and maintained backend services in Java, Kotlin, and Spring Boot for clients in pharma, payments, and logistics.",
+        "Designed REST APIs for integrating with third-party systems.",
+        "Reviewed code, wrote technical documentation, and worked day-to-day in an agile team.",
       ],
       tech: ["Java", "Kotlin", "Spring Boot", "PostgreSQL", "REST API"],
       projects: [
         {
-          name: "AstraZeneca — Pharmaceutical Distribution Management System",
+          name: "AstraZeneca - Pharmaceutical Distribution Management System",
           description:
-            "Modernized a 10+ year-old system for distributing medicines to pharmacies and hospitals across the Czech Republic, working in a team of 9. Delivered a faster, more intuitive UI and eliminated the recurring errors of the legacy software, with quick reporting and statistics generation. Worked in an agile process based on regular stakeholder sessions; the system was delivered as a complete, cloud-native product with full documentation.",
+            "Helped rebuild a 10+ year-old system that distributes medicines to pharmacies and hospitals across the Czech Republic, in a team of nine. We replaced the legacy app with a cloud-native rewrite that cleared its long-standing bugs and made reports and statistics quick to pull. It ran as a normal agile process with regular stakeholder reviews.",
           tech: [
             "React",
             "Kotlin",
@@ -219,9 +242,9 @@ export const resumeEn: ResumeData = {
           ],
         },
         {
-          name: "Global Payments — Card-Issuing-as-a-Service Platform",
+          name: "Global Payments - Card-Issuing-as-a-Service Platform",
           description:
-            "Built a modern card-issuing and management platform with a team of 7–10, enabling end customers to embed physical and digital payment cards into their own products within six months, without a banking license. Combined card creation, issuing, and management with integration into Global Payments' internal systems, using a modular, API-first, scalable (MACH) architecture built for long-term maintainability.",
+            "Worked in a team of seven to ten on a card-issuing platform that lets a company offer its own physical and digital payment cards without holding a banking license. It connects card creation and management to Global Payments' internal systems, and is built API-first so customers can ship in months rather than years.",
           tech: ["Java", "JVM", "React", "Docker", "HashiCorp Consul"],
         },
       ],
@@ -233,7 +256,7 @@ export const resumeEn: ResumeData = {
       bullets: [
         "Performed root-cause analysis on complex customer technical issues and proposed actionable fixes.",
         "Collaborated cross-functionally with development, QA, and product teams on escalated cases.",
-        "Built out the knowledge base — authoring technical articles and best-practice guides.",
+        "Built out the knowledge base - authoring technical articles and best-practice guides.",
       ],
     },
   ],
@@ -241,11 +264,27 @@ export const resumeEn: ResumeData = {
   skills: [
     {
       group: "AI & agentic tooling",
-      items: ["Claude Code", "MCP servers", "agent orchestration", "prompt engineering", "tool use", "RAG"],
+      items: [
+        "Claude Code",
+        "MCP servers",
+        "agent orchestration",
+        "prompt engineering",
+        "tool use",
+        "RAG",
+      ],
     },
     {
       group: "Backend",
-      items: ["Java", "Kotlin", "Spring Boot", "REST API", "PostgreSQL", "SQL", "TypeScript", "Node.js"],
+      items: [
+        "Java",
+        "Kotlin",
+        "Spring Boot",
+        "REST API",
+        "PostgreSQL",
+        "SQL",
+        "TypeScript",
+        "Node.js",
+      ],
     },
     {
       group: "Cloud & CI/CD",
@@ -253,13 +292,19 @@ export const resumeEn: ResumeData = {
     },
     {
       group: "Process & collaboration",
-      items: ["process decomposition", "root-cause analysis", "code review", "agile/scrum", "technical documentation"],
+      items: [
+        "process decomposition",
+        "root-cause analysis",
+        "code review",
+        "agile/scrum",
+        "technical documentation",
+      ],
     },
   ],
 
   education: [
     {
-      school: "Secondary Technical School — Electrical Engineering",
+      school: "Secondary Technical School - Electrical Engineering",
       credential: "Stredná škola elektrotechnická, Trnava, Slovakia",
     },
   ],
@@ -275,33 +320,33 @@ export const resumeEn: ResumeData = {
     {
       name: "PipelineIQ",
       blurb:
-        "A closed-loop agent pipeline for software development — planning, implementation, review, and commit orchestrated by AI agents with structured artifacts as context.",
+        "A closed-loop agent pipeline for software development - planning, implementation, review, and commit orchestrated by AI agents with structured artifacts as context.",
     },
     {
       name: "PromptIQ",
       blurb:
-        "Prompt analytics for Claude Code — tracks prompt performance, identifies patterns, and helps optimise agentic workflows.",
+        "Prompt analytics for Claude Code - tracks prompt performance, identifies patterns, and helps optimise agentic workflows.",
     },
     {
       name: "AI Assistant",
       blurb:
-        "A deployed AI assistant over an Obsidian knowledge base — answers queries with personal notes as context via RAG.",
+        "A deployed AI assistant over an Obsidian knowledge base - answers queries with personal notes as context via RAG.",
     },
     {
       name: "Email Brief IQ",
       blurb:
-        "A Claude Code plugin for email triage — summarises the inbox and drafts responses directly inside an agentic workflow.",
+        "A Claude Code plugin for email triage - summarises the inbox and drafts responses directly inside an agentic workflow.",
     },
     {
       name: "UXIQ",
       blurb:
-        "A Python CLI for UI accessibility audits — automates WCAG checks and generates actionable reports.",
+        "A Python CLI for UI accessibility audits - automates WCAG checks and generates actionable reports.",
     },
     {
       name: "This CV App",
       href: "https://github.com/MarioEpkOne/CVapplication",
       blurb:
-        "A deliberately over-engineered interactive resume + cover letter built as a work sample. Next.js, tRPC, Drizzle, agent-context artifacts as first-class deliverables. Includes a work-in-progress live \"Ask the Agent\" demo (a serverless agent on AWS Lambda) — still experimental.",
+        'A deliberately over-engineered interactive resume + cover letter built as a work sample. Next.js, tRPC, Drizzle, agent-context artifacts as first-class deliverables. Includes a work-in-progress live "Ask the Agent" demo (a serverless agent on AWS Lambda) - still experimental.',
     },
   ],
 
