@@ -1,4 +1,0 @@
-# Implementer Project Knowledge
-
-- When changing the Lambda's mock Forex tool set, update every place CLAUDE.md counts or lists it (the "six mock Forex tools" count, the enumerated tool names, and the adjacent MockAgent sentence) in the same edit — stale doc counts are a recurring SPEC_DRIFT finding here.
-- CZ resume/cover-letter content uses typographic quotes (U+201E „ … U+201C ") in src/data/resume.ts and src/data/cover-letter.ts. The Edit tool may silently substitute an ASCII " (U+0022) for a closing curly quote, producing "unterminated string literal" typecheck errors. After editing such strings, byte-verify the glyphs (or write them via a script with explicit \uXXXX escapes) and run `npm run typecheck` before moving on. Treat a typecheck failure on a line you just edited with special characters as a glyph-encoding issue, not a logic bug.

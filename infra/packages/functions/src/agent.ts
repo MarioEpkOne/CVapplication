@@ -85,16 +85,9 @@ export interface GroqLike {
   };
 }
 
-// Keep GroqToolCall and tool_calls? field — harmless, unused, avoids churn.
-interface GroqToolCall {
-  id: string;
-  function: { name: string; arguments: string };
-}
-
 interface GroqMessage {
   role: string;
   content?: string | null;
-  tool_calls?: GroqToolCall[];
 }
 
 interface GroqCompletion {

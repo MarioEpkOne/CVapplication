@@ -1,8 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
-// TTL_SECONDS is the issuer's TTL; the verifier only checks the exp claim.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const TTL_SECONDS = 60;
 const LEEWAY_SECONDS = 5;
 
 // Decodes a base64url string back to a Buffer.

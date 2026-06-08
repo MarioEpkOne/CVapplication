@@ -30,6 +30,13 @@ export function signAgentToken(secret: string, now: number = Date.now()): string
 
 /**
  * Verifies an agent request token.
+ *
+ * NOTE: In production the Next.js side only *signs* tokens (see signAgentToken,
+ * called from /api/agent-token); the AWS Lambda performs the authoritative
+ * verification with its own copy in infra/packages/functions/src/token.ts.
+ * This function exists so tests/agent-token.test.ts can round-trip a signed
+ * token (sign here → verify here) and assert tamper/expiry handling.
+ *
  * Returns { ok: true } on success or { ok: false, reason } on failure.
  */
 export function verifyAgentToken(

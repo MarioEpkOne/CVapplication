@@ -14,9 +14,8 @@ dist/
 next-env.d.ts
 
 # Environment / secrets
-.env
-.env.local
-.env*.local
+.env*
+!.env.example
 
 # Database (SQLite on Fly volume)
 *.db
@@ -47,3 +46,6 @@ specs/
 Working Logs/
 Implementation Plans/
 learnings.md
+
+# Pipeline internal KB (kept local, not a public deliverable)
+.claude/pipeline-kb/
