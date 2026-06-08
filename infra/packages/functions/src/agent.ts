@@ -56,7 +56,9 @@ declare const awslambda: {
       context: unknown,
     ) => Promise<void>,
   ) => unknown;
-  HttpResponseStream: {
+  // Optional: absent in unit-test/import contexts and in the @aws-sdk stub that
+  // sets globalThis.awslambda without the streaming helpers.
+  HttpResponseStream?: {
     from(stream: NodeJS.WritableStream, metadata: { statusCode: number }): NodeJS.WritableStream;
   };
 };
@@ -290,6 +292,29 @@ function send(stream: NodeJS.WritableStream, e: AgentEvent): void {
   stream.write(JSON.stringify(e) + "\n");
 }
 
+// Reject a request on a streaming Function URL with a real non-2xx status.
+// On RESPONSE_STREAM Function URLs the status/headers live in a metadata
+// "prelude" that `HttpResponseStream.from` only flushes on the FIRST write —
+// calling end() with no prior write leaves the status at the default 200
+// (aws-lambda-nodejs-runtime-interface-client#97). So we MUST write one byte
+// through the WRAPPED stream before ending it, or the intended 403/429 is lost
+// and the browser (seeing 200) waits out the cold-start timeout before falling
+// back to mock instead of failing fast. Guarded so the module stays import-safe
+// in unit tests where `awslambda`/`HttpResponseStream` is absent.
+export function sendReject(stream: NodeJS.WritableStream, statusCode: number): void {
+  if (
+    typeof awslambda !== "undefined" &&
+    typeof awslambda.HttpResponseStream?.from === "function"
+  ) {
+    const wrapped = awslambda.HttpResponseStream.from(stream, { statusCode });
+    wrapped.write(" "); // non-empty write flushes the status prelude (see above)
+    wrapped.end();
+    return;
+  }
+  // Non-streaming / test context: best-effort plain end.
+  stream.end();
+}
+
 function parseBody(event: LambdaUrlEvent): unknown {
   if (!event.body) return undefined;
   const raw = event.isBase64Encoded
@@ -321,8 +346,8 @@ async function streamHandler(
 
   // Gate 1: origin. In prod (REQUIRE_ORIGIN=true) a missing origin is rejected.
   if (!isOriginAllowed(origin, allowedOrigins, requireOrigin)) {
-    // 403 with no body; Function URL CORS handles preflight separately.
-    responseStream.end();
+    // 403; Function URL CORS handles preflight separately.
+    sendReject(responseStream, 403);
     return;
   }
 
@@ -338,8 +363,7 @@ async function streamHandler(
     const secret = process.env.AGENT_SIGNING_SECRET ?? "";
     const token = (parsed as { token?: unknown })?.token;
     if (!secret || !verifyAgentToken(token, secret, Date.now()).ok) {
-      awslambda.HttpResponseStream.from(responseStream, { statusCode: 403 });
-      responseStream.end();
+      sendReject(responseStream, 403);
       return;
     }
   }
@@ -388,8 +412,7 @@ async function streamHandler(
     const budgetDeps = getBudgetDeps();
     const budget = await reserveRequest(budgetDeps);
     if (!budget.allowed) {
-      awslambda.HttpResponseStream.from(responseStream, { statusCode: 429 });
-      responseStream.end();
+      sendReject(responseStream, 429);
       return;
     }
 

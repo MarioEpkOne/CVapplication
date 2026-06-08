@@ -4,6 +4,7 @@ import {
   isOriginAllowed,
   PITCH_INSTRUCTION,
   sanitizeForFence,
+  sendReject,
   type GroqLike,
 } from "../src/agent";
 import type { AgentEvent } from "@shared/events";
@@ -477,4 +478,86 @@ describe("runAgent", () => {
   // (verifyAgentToken) and budget gate (reserveRequest) are fully unit-tested in
   // token.test.ts and budget.test.ts respectively. These handler paths are covered
   // by manual/runtime verification post-deploy (see Post-Implementation Checklist).
+});
+
+describe("sendReject (streaming Function URL status flush)", () => {
+  type Call = string;
+
+  function fakeRaw(calls: Call[]) {
+    return {
+      write: () => {
+        calls.push("raw:write");
+        return true;
+      },
+      end: () => {
+        calls.push("raw:end");
+      },
+    } as unknown as NodeJS.WritableStream;
+  }
+
+  it("writes through the WRAPPED stream BEFORE end so the status prelude flushes", () => {
+    const calls: Call[] = [];
+    let capturedStatus = -1;
+    const wrapped = {
+      write: (s: unknown) => {
+        calls.push(`wrapped:write:${String(s)}`);
+        return true;
+      },
+      end: () => {
+        calls.push("wrapped:end");
+      },
+    } as unknown as NodeJS.WritableStream;
+
+    (globalThis as Record<string, unknown>).awslambda = {
+      HttpResponseStream: {
+        from: (_stream: unknown, meta: { statusCode: number }) => {
+          capturedStatus = meta.statusCode;
+          calls.push(`from:${meta.statusCode}`);
+          return wrapped;
+        },
+      },
+    };
+    try {
+      sendReject(fakeRaw(calls), 403);
+    } finally {
+      delete (globalThis as Record<string, unknown>).awslambda;
+    }
+
+    expect(capturedStatus).toBe(403);
+    // Order matters: the prelude is emitted on the first write, so write MUST
+    // precede end (regression guard for aws-lambda runtime-client #97).
+    expect(calls).toEqual(["from:403", "wrapped:write: ", "wrapped:end"]);
+    // The original raw stream is never written/ended directly.
+    expect(calls.some((c) => c.startsWith("raw:"))).toBe(false);
+  });
+
+  it("passes through the requested status code (429)", () => {
+    const calls: Call[] = [];
+    let capturedStatus = -1;
+    const wrapped = {
+      write: () => true,
+      end: () => {},
+    } as unknown as NodeJS.WritableStream;
+    (globalThis as Record<string, unknown>).awslambda = {
+      HttpResponseStream: {
+        from: (_s: unknown, meta: { statusCode: number }) => {
+          capturedStatus = meta.statusCode;
+          return wrapped;
+        },
+      },
+    };
+    try {
+      sendReject(fakeRaw(calls), 429);
+    } finally {
+      delete (globalThis as Record<string, unknown>).awslambda;
+    }
+    expect(capturedStatus).toBe(429);
+  });
+
+  it("falls back to a plain end() when awslambda/HttpResponseStream is absent (import/test context)", () => {
+    const calls: Call[] = [];
+    // awslambda is undefined here — mirrors the unit-test / @aws-sdk-stub context.
+    sendReject(fakeRaw(calls), 403);
+    expect(calls).toEqual(["raw:end"]);
+  });
 });
