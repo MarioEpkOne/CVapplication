@@ -36,10 +36,17 @@ export default $config({
       // from this (streaming ? RESPONSE_STREAM : BUFFERED) — there is no
       // `url.invokeMode` property, so this top-level flag is the only switch.
       streaming: true,
-      // D1: hard ceiling on parallel executions. A bot cannot fan out to
-      // unbounded simultaneous Groq calls / DynamoDB writes regardless of IP
-      // rotation. 5 is ample for a portfolio site's honest traffic.
-      concurrency: { reserved: 5 },
+      // No reserved concurrency: this AWS account's region-wide Lambda quota is
+      // 10 (new-account default), and AWS rejects reserving against it —
+      // reserving any amount drops the unreserved pool below its enforced
+      // minimum of 10, so PutFunctionConcurrency returns a 400. That same
+      // 10-execution account ceiling already caps total parallelism for this
+      // function more tightly than `reserved: 5` would have (excess invocations
+      // get 429-throttled), and per-attacker abuse is bounded by the DynamoDB
+      // per-IP rate limiter (10 req / 60s). To add a function-scoped cap later,
+      // raise the "Concurrent executions" Service Quota (eu-central-1) to
+      // >= 100 + N, then re-add `concurrency: { reserved: N }`. Never use
+      // `reserved: 0` to "remove" it — that throttles the function to zero.
       link: [groqKey, sessions],
       environment: {
         GROQ_API_KEY: groqKey.value,
