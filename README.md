@@ -2,7 +2,7 @@
 
 > A work sample that is the argument.
 
-This is a deliberately over-engineered interactive resume + cover letter, built as a job-application work sample. It uses a modern TypeScript application-layer stack — Next.js, Tailwind, tRPC while being  deployed on Fly.io.
+This is a deliberately over-engineered interactive resume + cover letter, built as a job-application work sample. It uses a modern TypeScript application-layer stack - Next.js, Tailwind, tRPC - while being deployed on Fly.io.
 
 ---
 
