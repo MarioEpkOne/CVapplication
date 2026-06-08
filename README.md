@@ -1,4 +1,4 @@
-# Mario Alina — Interactive Resume
+# Mario Alina - Interactive Resume
 
 > A work sample that is the argument.
 
