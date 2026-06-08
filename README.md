@@ -2,7 +2,7 @@
 
 > A work sample that is the argument.
 
-This is a deliberately over-engineered interactive resume + cover letter, built as a job-application work sample. It uses a modern TypeScript application-layer stack — Next.js, Tailwind, tRPC — while being honestly deployed on Fly.io instead of AWS. (Ask me why. Or read the [ADR](docs/adr/0001-fly-over-aws.md).)
+This is a deliberately over-engineered interactive resume + cover letter, built as a job-application work sample. It uses a modern TypeScript application-layer stack — Next.js, Tailwind, tRPC while being  deployed on Fly.io.
 
 ---
 
